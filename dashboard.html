@@ -168,19 +168,21 @@
 
   /* ---------------- BUILD TASKS ---------------- */
   function buildSubjectTasks(key){
-    const s = CURRICULUM[key]; const tasks = []; let lecNo = 0;
+    const s = CURRICULUM[key]; const tasks = []; let lecNo = 0, dppNo = 0;
     s.chapters.forEach((ch, ci)=>{
-      const [chName, lecCount] = ch;
-      for(let i=1;i<=lecCount;i++){
+      const chLabel = 'Ch - ' + String(ch.no).padStart(2,'0') + ' : ' + ch.name;
+      for(let i=1;i<=ch.v;i++){
         lecNo++;
-        const lecMins = 70 + ((lecNo*37 + ci*11) % 45);       // 70–114 min at 1x
-        const dppMins = 30 + ((lecNo*23) % 25);               // 30–54 min
-        const chLabel = 'Ch - ' + String(ci+1).padStart(2,'0') + ' : ' + chName;
+        const lecMins = 70 + ((lecNo*37 + ci*11) % 45);       // 70–114 min at 1x (until real durations)
         tasks.push({ id:key+'-L'+lecNo, subj:key, type:'LECTURE', mins:lecMins, scaled:true,
-          title:String(lecNo).padStart(2,'0') + ' : ' + chName + ' (Part - ' + String(i).padStart(2,'0') + ')',
+          title:String(lecNo).padStart(2,'0') + ' : ' + ch.name + (ch.v>1 ? ' (Lecture ' + String(i).padStart(2,'0') + ')' : ''),
           chap:chLabel });
-        tasks.push({ id:key+'-D'+lecNo, subj:key, type:'DPP', mins:dppMins, scaled:false,
-          title:'DPP ' + String(lecNo).padStart(2,'0') + ' (Of Lec ' + String(lecNo).padStart(2,'0') + ')',
+      }
+      for(let j=1;j<=ch.e;j++){
+        dppNo++;
+        const dppMins = 30 + ((dppNo*23) % 25);               // 30–54 min
+        tasks.push({ id:key+'-D'+dppNo, subj:key, type:'DPP', mins:dppMins, scaled:false,
+          title:'DPP ' + String(j).padStart(2,'0') + ' : ' + ch.name,
           chap:chLabel });
       }
     });
