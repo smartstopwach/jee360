@@ -230,13 +230,10 @@
           title:title,
           chap:chLabel });
       }
-      for(let j=1;j<=ch.e;j++){
-        dppNo++;
-        const dppMins = 30 + ((dppNo*23) % 25);               // 30–54 min
-        tasks.push({ id:key+'-D'+dppNo, subj:key, type:'DPP', mins:dppMins, scaled:false,
-          title:'DPP ' + String(j).padStart(2,'0') + ' : ' + ch.name,
-          chap:chLabel });
-      }
+      /* NOTE: DPPs are NOT scheduled as daily tasks —
+         DPP ka alag scene hai (aayega baad mein).
+         Data data.js mein saved hai (ch.e counts), bas
+         daily path mein sirf LECTURES ginte hain. */
     });
     return tasks;
   }
