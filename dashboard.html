@@ -90,6 +90,11 @@
   .day-section .day-head{border:none;color:#fff;}
   .day-section .day-head .dh-time{color:rgba(255,255,255,.92);}
   .day-section .today-tag{background:rgba(255,255,255,.25);}
+  /* din ka rang cards ke andar tak — poora fill */
+  .day-section .task{background:var(--dcbg,#fff);border:1.5px solid var(--dcbd,var(--border));}
+  .day-section .mini-task{background:var(--dcbg,#fff);border:1.5px solid var(--dcbd,var(--border));}
+  .day-section .task .btn, .day-section .mini-task .btn{background:#fff;}
+  .day-section .task .done-btn{background:var(--accent-dark);}
   .day-head{
     display:flex;justify-content:space-between;align-items:center;
     font-weight:800;color:#1c2340;padding:10px 16px;
@@ -769,7 +774,7 @@
       const dc = PAL[(d-1) % PAL.length];
       html += `
       <div class="day-section${isToday?' today':''}"
-           style="background:${dc}12;border-color:${dc}55">
+           style="background:${dc}0d;border-color:${dc}55;--dcbg:${dc}1f;--dcbd:${dc}59">
         <div class="day-head" style="background:linear-gradient(120deg,${dc},${dc}cc)">
           <span>📅 Day ${d} · ${dateFor(d)}${isToday?'<span class="today-tag">AAJ</span>':''}</span>
           <span class="dh-time">${fmt(headTime)}</span>
