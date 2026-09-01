@@ -60,6 +60,19 @@
     padding:10px 16px;display:inline-block;
   }
   .day-goal b{color:var(--accent-dark);}
+  .today-progress{
+    margin-top:12px;background:#fff;border:1px solid var(--border);
+    border-radius:12px;padding:14px 18px;max-width:560px;
+  }
+  .today-progress .tp-line{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:.92rem;color:#4a536e;font-weight:600;margin-bottom:8px;flex-wrap:wrap;gap:6px;
+  }
+  .today-progress .tp-line b{color:var(--ink);}
+  .today-progress .tp-pct{color:var(--accent-dark);font-weight:800;font-size:1.05rem;}
+  .tp-bar{height:9px;border-radius:99px;background:#edf0fa;overflow:hidden;}
+  .tp-bar i{display:block;height:100%;border-radius:99px;
+    background:linear-gradient(90deg,var(--accent),#22d3ee);transition:width .3s;}
 
   /* ---------- VIEW FILTER ---------- */
   .filter-row{display:flex;gap:10px;margin:4px 0 20px;flex-wrap:wrap;}
@@ -178,6 +191,7 @@
       <span class="total-time" id="todayTotal">🕐 —</span>
     </div>
     <p class="day-goal" id="dayLine"></p>
+    <div class="today-progress" id="todayProgress"></div>
     <p class="plan-sub" id="planSub"></p>
     <div class="filter-row">
       <button class="f-btn active" data-range="3">📅 3 Din</button>
@@ -415,6 +429,19 @@
     document.getElementById('planSub').innerHTML =
       '<b>' + pctToday + '% completed</b> · ' + todayPending.length + ' to go · ' +
       fmt(leftMins) + ' left <span style="color:#b6bdd8">at ' + speed + 'x</span>';
+
+    /* aaj ka progress: kitne lec ho gaye, kitna time, % */
+    const todaySched = allTasks.filter(t=>dayOf(t)===currentDay);
+    const todayDone  = todaySched.filter(t=>done.has(t.id));
+    const tpTot  = todaySched.reduce((s,t)=>s+effMins(t),0);
+    const tpDone = todayDone.reduce((s,t)=>s+effMins(t),0);
+    const tpPct  = tpTot ? Math.round(tpDone/tpTot*100) : 0;
+    document.getElementById('todayProgress').innerHTML = `
+      <div class="tp-line">
+        <span>Aaj: <b>${todayDone.length}/${todaySched.length}</b> lectures done · <b>${fmt(tpDone)}</b> / ${fmt(tpTot)}</span>
+        <span class="tp-pct">${tpPct}%</span>
+      </div>
+      <div class="tp-bar"><i style="width:${tpPct}%"></i></div>`;
     document.getElementById('fullBtn').textContent = 'Pura Plan (' + days + ' din)';
 
     /* group tasks by their scheduled day */
