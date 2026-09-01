@@ -697,6 +697,14 @@
     });
   });
 
+  /* real-time cloud sync: doosre device ka tick/untick yahan live dikhe */
+  window.addEventListener('jee360:cloudchange', ()=>{
+    try{ done = new Set(JSON.parse(localStorage.getItem('jee360.done')||'[]')); }catch(e){}
+    try{ moves = JSON.parse(localStorage.getItem('jee360.moves')||'{}'); }catch(e){}
+    try{ replaced = new Set(JSON.parse(localStorage.getItem('jee360.replaced')||'[]')); }catch(e){}
+    render();
+  });
+
   render();
 })();
 </script>

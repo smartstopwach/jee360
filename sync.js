@@ -139,30 +139,52 @@
     out.onclick = () => { if(confirm('Logout karna hai? (Data Google pe safe rahega)')) auth.signOut(); };
   }
 
-  auth.onAuthStateChanged(async u => {
+  let unsub = null;
+  auth.onAuthStateChanged(u => {
     user = u;
+    if(unsub){ unsub(); unsub = null; }
     if(!u){ ready = false; loggedOutUI(); return; }
     loggedInUI(u);
-    try{
-      const snap = await db.collection('users').doc(u.uid).get();
+    let firstSnap = true;
+    /* REAL-TIME sync: doosre device pe tick/untick karo →
+       yahan turant apply hota hai (bina refresh ke) */
+    unsub = db.collection('users').doc(u.uid).onSnapshot(snap => {
+      if(snap.metadata.hasPendingWrites) return;   // apna hi write, ignore
       const cloud = snap.exists && snap.data() && snap.data().data;
+      if(firstSnap){
+        firstSnap = false;
+        if(cloud && Object.keys(cloud).length){
+          const changed = applyCloud(cloud);
+          ready = true;
+          if(changed){
+            /* cloud ka data laga — dashboard live re-render, baaki pages reload */
+            if(document.getElementById('taskList')){
+              window.dispatchEvent(new Event('jee360:cloudchange'));
+            } else if(!sessionStorage.getItem('jee360.justSynced')){
+              sessionStorage.setItem('jee360.justSynced', '1');
+              location.reload();
+              return;
+            }
+          }
+          sessionStorage.removeItem('jee360.justSynced');
+        } else {
+          ready = true;
+          pushCloud();   // cloud khali — pehli baar: local data upar
+        }
+        return;
+      }
+      /* live update from another device */
       if(cloud && Object.keys(cloud).length){
         const changed = applyCloud(cloud);
-        ready = true;
-        if(changed && !sessionStorage.getItem('jee360.justSynced')){
-          sessionStorage.setItem('jee360.justSynced', '1');
-          location.reload();
-          return;
+        if(changed){
+          setDot('#34A853', 'Doosre device se update aaya');
+          window.dispatchEvent(new Event('jee360:cloudchange'));
         }
-      } else {
-        ready = true;
-        pushCloud();
       }
-      sessionStorage.removeItem('jee360.justSynced');
-    }catch(e){
-      console.warn('[sync] pull fail', e);
+    }, e => {
+      console.warn('[sync] listener fail', e);
       ready = true;
       setDot('#EA4335', 'Sync fail');
-    }
+    });
   });
 })();
