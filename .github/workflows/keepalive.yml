@@ -1,0 +1,25 @@
+name: Keep alive
+
+# GitHub public repo me 60 din tak koi commit na ho toh scheduled
+# jobs pause ho jaati hain. Ye workflow mahine me 2 baar ek khaali
+# commit karke timer reset kar deta hai — notifications kabhi nahi rukenge.
+
+on:
+  schedule:
+    - cron: '0 3 1,15 * *'   # har mahine 1 & 15 tarikh, 08:30 IST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Empty commit (timer reset)
+        run: |
+          git config user.name "jee360-bot"
+          git config user.email "jee360@users.noreply.github.com"
+          git commit --allow-empty -m "🤖 keep-alive — scheduled notifications active"
+          git push
