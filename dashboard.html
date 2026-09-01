@@ -193,10 +193,6 @@
       <h4>Your subjects</h4>
       <div id="subjList"></div>
     </div>
-    <div class="side-card">
-      <h4>Data status</h4>
-      <p class="health-desc" id="dataStatus"></p>
-    </div>
   </aside>
 </div>
 
@@ -471,7 +467,7 @@
         <div class="bar"><i style="width:${pct}%"></i></div>`;
     }).join('');
 
-    /* data status: kitne lectures ka exact duration hai */
+    /* data status: internal only — console mein dikhta hai, UI mein nahi */
     let exact = 0, totalLec = 0;
     subjects.forEach(k=>{
       CURRICULUM[k].chapters.forEach(ch=>{
@@ -479,9 +475,7 @@
         if(ch.lectures) exact += Math.min(ch.lectures.length, ch.v);
       });
     });
-    document.getElementById('dataStatus').innerHTML =
-      '🎯 <b>' + exact + '</b> of <b>' + totalLec + '</b> lectures ka exact duration hai.<br>' +
-      'Baaki <b>' + (totalLec-exact) + '</b> pe 2h default — jaise-jaise chapter data aayega, exact hota jayega.';
+    console.log('[JEE360 data] exact durations: ' + exact + '/' + totalLec + ' lectures');
 
     /* events */
     list.querySelectorAll('[data-done]').forEach(b=>{
