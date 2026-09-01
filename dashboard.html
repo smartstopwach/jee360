@@ -396,6 +396,7 @@
       <span class="mt-title">${t.title}${wasMoved?' <span style="color:#e05b8a;font-size:.72rem;font-weight:800">(MOVED)</span>':''}</span>
       <span class="mt-time">${fmt(effMins(t))}</span>
       ${wasMoved?'<button class="btn mini-undo" data-undo="'+t.id+'">↩ Wapas</button>':''}
+      ${isDone?'<button class="btn mini-undo" data-undone="'+t.id+'">↩ Un-done</button>':''}
     </div>`;
   }
 
@@ -434,6 +435,12 @@
         rows = todayPending.length
           ? todayPending.map(fullCard).join('')
           : '<div class="all-done">🎉 All done for today! Day ' + d + ' complete — kal milte hain.</div>';
+        /* recently completed — galti se Done? yahin se un-done */
+        const recent = [...done].slice(-5).reverse().map(id=>taskById[id]).filter(Boolean);
+        if(recent.length){
+          rows += '<p class="day-note" style="margin:14px 0 8px">✅ Recently completed:</p>' +
+                  recent.map(miniRow).join('');
+        }
       }
       else if(d < currentDay){
         const tasksD = byDay[d] || [];
@@ -518,6 +525,13 @@
       b.addEventListener('click', ()=>{
         delete moves[b.dataset.undo];
         saveMoves(); render();
+      });
+    });
+    /* un-done: galti se Done hua toh wapas pending */
+    list.querySelectorAll('[data-undone]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        done.delete(b.dataset.undone);
+        saveDone(); render();
       });
     });
     const ua = document.getElementById('undoAll');
