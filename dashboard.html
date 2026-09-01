@@ -242,41 +242,69 @@
   subjects.forEach(k=> bySubject[k] = buildSubjectTasks(k));
 
   /* ---------------- 90/120-DAY PATH (chapter continuity) ----------------
-     RULE: ek chapter start kiya toh pehle usko KHATAM karo, phir agla —
-     har subject ki queue chapter order mein sequential chalti hai.
-     Weekly mode : max 2 subjects per day (rotating pairs across week).
-     Single mode : ek subject poora khatam, phir agla subject. */
+     RULE 1: ek din me max 2 chapters (2 subjects).
+     RULE 2: jo chapter chal raha hai, WAHI agle din continue hota hai —
+             jab tak khatam na ho. Khatam hone par hi us slot me agla
+             subject ka chapter aata hai (rotation se variety milti hai).
+     Single mode: ek subject poora khatam, phir agla. */
   const effMins = t => t.scaled ? t.mins/speed : t.mins;
   const totalEffMins = subjects.reduce((s,k)=>s+bySubject[k].reduce((a,t)=>a+effMins(t),0),0);
   const quota = totalEffMins / days;   // DAILY GOAL (mins/day)
 
   const queues = {}; subjects.forEach(k=> queues[k] = bySubject[k].slice());
-  const nonEmpty = () => subjects.filter(k=>queues[k].length);
   const baseDayOf = {};
   const allTasks = [];
 
-  for(let day=1; day<=days; day++){
-    let act = nonEmpty();
-    if(!act.length) break;
-    let dayS;
-    if(mode === 'single'){
-      dayS = [act[0]];                                  // one subject till it's finished
-    }else{
-      const off = ((day-1)*2) % act.length;             // rotate pairs day by day
-      dayS = act.length>1 ? [act[off], act[(off+1)%act.length]] : [act[0]];
-      if(dayS[0]===dayS[1]) dayS = [dayS[0]];
+  if(mode === 'single'){
+    /* ek subject poora, phir agla — din quota se bharte jao */
+    let day = 1, acc = 0;
+    for(const k of subjects){
+      const q = queues[k];
+      while(q.length){
+        const t = q.shift();
+        baseDayOf[t.id] = Math.min(day, days); allTasks.push(t); acc += effMins(t);
+        if(acc >= quota && day < days){ day++; acc = 0; }
+      }
     }
-    const target = quota / dayS.length;                 // split day between its subjects
-    for(const k of dayS){
-      let acc = 0;
-      while(queues[k].length && acc < target){          // sequential = chapter continuity
-        const t = queues[k].shift();
-        baseDayOf[t.id] = day; allTasks.push(t); acc += effMins(t);
+  } else {
+    /* Weekly: 2 chapter-slots — chapter continue, khatam pe rotate */
+    const order = subjects.slice();
+    let ptr = 0;
+    const nextSub = (exclude)=>{
+      for(let i=0;i<order.length;i++){
+        const k = order[(ptr+i)%order.length];
+        if(queues[k].length && k!==exclude){ ptr = (ptr+i+1)%order.length; return k; }
+      }
+      for(const k of order) if(queues[k].length) return k;   // fallback
+      return null;
+    };
+    const slots = [];
+    slots[0] = nextSub(null);
+    slots[1] = nextSub(slots[0]);
+
+    for(let day=1; day<=days; day++){
+      const active = slots.filter(k=>k && queues[k].length);
+      if(!active.length && !subjects.some(k=>queues[k].length)) break;
+      const target = quota / Math.max(1, slots.filter(Boolean).length);
+      for(let si=0; si<slots.length; si++){
+        let acc = 0;
+        while(acc < target){
+          let k = slots[si];
+          const other = slots[1-si];
+          if(!k || !queues[k].length){ slots[si] = nextSub(other); k = slots[si]; }
+          if(!k || !queues[k].length) break;
+          const t = queues[k].shift();
+          baseDayOf[t.id] = day; allTasks.push(t); acc += effMins(t);
+          /* chapter KHATAM? tabhi slot agle subject pe ghoomta hai */
+          if(!queues[k].length || queues[k][0].chap !== t.chap){
+            slots[si] = nextSub(other);
+          }
+        }
       }
     }
   }
   /* leftovers (agar bache) → last day */
-  nonEmpty().forEach(k=>{ while(queues[k].length){ const t=queues[k].shift(); baseDayOf[t.id]=days; allTasks.push(t); } });
+  subjects.forEach(k=>{ while(queues[k].length){ const t=queues[k].shift(); baseDayOf[t.id]=days; allTasks.push(t); } });
 
   /* ---------------- STATE ---------------- */
   let done = new Set();
