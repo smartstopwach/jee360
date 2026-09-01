@@ -299,7 +299,10 @@
     for(let day=1; day<=days; day++){
       const anyLeft = subjects.some(k=>queues[k].length);
       if(!anyLeft) break;
-      const target = quota / Math.max(1, slots.filter(Boolean).length);
+      /* har din ka target = bacha hua content / bache hue din
+         => plan EXACT 90/120 din tak chalta hai, jaldi khatam nahi */
+      const dayTarget = (totalEffMins - totalSched) / (days - day + 1);
+      const target = dayTarget / Math.max(1, slots.filter(Boolean).length);
       for(let si=0; si<slots.length; si++){
         let acc = 0;
         while(acc < target){
@@ -511,6 +514,15 @@
       viewRange = +b.dataset.range;
       render();
     });
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
+);
   });
 
   render();
