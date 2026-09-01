@@ -241,41 +241,49 @@
   const bySubject = {};
   subjects.forEach(k=> bySubject[k] = buildSubjectTasks(k));
 
-  // ordering: weekly = round-robin across subjects (lecture+dpp pairs), single = sequential
-  let allTasks = [];
-  if(mode === 'single'){
-    subjects.forEach(k=> allTasks.push(...bySubject[k]));
-  }else{
-    const idx = {}; subjects.forEach(k=>idx[k]=0);
-    let remaining = subjects.reduce((s,k)=>s+bySubject[k].length,0);
-    while(remaining>0){
-      for(const k of subjects){
-        const arr = bySubject[k];
-        for(let c=0;c<2 && idx[k]<arr.length;c++){ allTasks.push(arr[idx[k]++]); remaining--; }
+  /* ---------------- 90/120-DAY PATH (chapter continuity) ----------------
+     RULE: ek chapter start kiya toh pehle usko KHATAM karo, phir agla —
+     har subject ki queue chapter order mein sequential chalti hai.
+     Weekly mode : max 2 subjects per day (rotating pairs across week).
+     Single mode : ek subject poora khatam, phir agla subject. */
+  const effMins = t => t.scaled ? t.mins/speed : t.mins;
+  const totalEffMins = subjects.reduce((s,k)=>s+bySubject[k].reduce((a,t)=>a+effMins(t),0),0);
+  const quota = totalEffMins / days;   // DAILY GOAL (mins/day)
+
+  const queues = {}; subjects.forEach(k=> queues[k] = bySubject[k].slice());
+  const nonEmpty = () => subjects.filter(k=>queues[k].length);
+  const baseDayOf = {};
+  const allTasks = [];
+
+  for(let day=1; day<=days; day++){
+    let act = nonEmpty();
+    if(!act.length) break;
+    let dayS;
+    if(mode === 'single'){
+      dayS = [act[0]];                                  // one subject till it's finished
+    }else{
+      const off = ((day-1)*2) % act.length;             // rotate pairs day by day
+      dayS = act.length>1 ? [act[off], act[(off+1)%act.length]] : [act[0]];
+      if(dayS[0]===dayS[1]) dayS = [dayS[0]];
+    }
+    const target = quota / dayS.length;                 // split day between its subjects
+    for(const k of dayS){
+      let acc = 0;
+      while(queues[k].length && acc < target){          // sequential = chapter continuity
+        const t = queues[k].shift();
+        baseDayOf[t.id] = day; allTasks.push(t); acc += effMins(t);
       }
     }
   }
+  /* leftovers (agar bache) → last day */
+  nonEmpty().forEach(k=>{ while(queues[k].length){ const t=queues[k].shift(); baseDayOf[t.id]=days; allTasks.push(t); } });
 
   /* ---------------- STATE ---------------- */
   let done = new Set();
   try{ done = new Set(JSON.parse(localStorage.getItem('jee360.done')||'[]')); }catch(e){}
   const saveDone = ()=> localStorage.setItem('jee360.done', JSON.stringify([...done]));
 
-  const effMins = t => t.scaled ? t.mins/speed : t.mins;
-  const totalEffMins = allTasks.reduce((s,t)=>s+effMins(t),0);
-  const quota = totalEffMins / days;   // DAILY GOAL (mins/day)
-
-  /* ---------- 90/120-DAY PATH ----------
-     Fill each day with ~quota minutes of tasks, in order.
-     Every task gets a base day (1..days). Deterministic. */
-  const baseDayOf = {};
-  { let d = 1, acc = 0;
-    for(const t of allTasks){
-      baseDayOf[t.id] = Math.min(d, days);
-      acc += effMins(t);
-      if(acc >= quota * d && d < days) d++;
-    }
-  }
+  const effMins2_removed = null; /* (scheduling moved above) */
 
   /* moves: task moved to a later day ("I'll do this next day") */
   let moves = {};
