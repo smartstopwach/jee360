@@ -366,6 +366,10 @@
   let moves = {};
   try{ moves = JSON.parse(localStorage.getItem('jee360.moves')||'{}'); }catch(e){}
   const saveMoves = ()=> localStorage.setItem('jee360.moves', JSON.stringify(moves));
+  /* replaced = jo lecture upar aaya tha (UPPED) aur wapas niche bheja gaya */
+  let replaced = new Set();
+  try{ replaced = new Set(JSON.parse(localStorage.getItem('jee360.replaced')||'[]')); }catch(e){}
+  const saveReplaced = ()=> localStorage.setItem('jee360.replaced', JSON.stringify([...replaced]));
 
   /* current day of the plan (from start date) */
   const startDate = new Date((plan.startDate || new Date().toISOString().slice(0,10)) + 'T00:00:00');
@@ -425,6 +429,7 @@
     const s = CURRICULUM[t.subj];
     const bd = dayOf(t);
     const backlog = bd < currentDay ? ' · <span style="color:#e05b8a;font-weight:800">BACKLOG · DAY ' + bd + '</span>' : '';
+    const upped = baseDayOf[t.id] > currentDay ? ' · <span style="color:#2eaa6e;font-weight:800">⏫ UPPED · Day ' + baseDayOf[t.id] + ' se</span>' : '';
     const timeStr = t.scaled
       ? '🕐 <b>'+fmt(t.mins/speed)+'</b> <small>· '+fmt(t.mins)+' at 1x</small>'
       : '🕐 <b>'+fmt(t.mins)+'</b>';
@@ -432,14 +437,14 @@
     <div class="task">
       <div class="t-top">
         <span><span class="subj">${s.name}</span><span class="teacher">${s.teacher}</span></span>
-        <span class="type">${t.type}${backlog}</span>
+        <span class="type">${t.type}${backlog}${upped}</span>
       </div>
       <h3>${t.title}</h3>
       <p class="chap">${t.chap} ↗</p>
       <div class="t-bottom">
         <span class="time">${timeStr}</span>
         <span class="actions">
-          <button class="btn" data-move="${t.id}">⏭ Next day</button>
+          <button class="btn" data-move="${t.id}">${upped?'⏬ Wapas niche':'⏭ Next day'}</button>
           <button class="btn done-btn" data-done="${t.id}">✓ Done</button>
         </span>
       </div>
@@ -449,10 +454,16 @@
     const isDone = done.has(t.id);
     const wasMoved = moves[t.id] && !isDone;
     const canPull = !isDone && !wasMoved && dayOf(t) > currentDay;
+    const isUpped = !isDone && dayOf(t) < baseDayOf[t.id];
+    const isReplaced = !isDone && !isUpped && replaced.has(t.id);
+    let tag = '';
+    if(wasMoved) tag = ' <span style="color:#e05b8a;font-size:.72rem;font-weight:800">(MOVED)</span>';
+    else if(isUpped) tag = ' <span style="color:#2eaa6e;font-size:.72rem;font-weight:800">(⏫ UPPED · Day '+baseDayOf[t.id]+' se)</span>';
+    else if(isReplaced) tag = ' <span style="color:#e8a03c;font-size:.72rem;font-weight:800">(🔁 REPLACED)</span>';
     return `<div class="mini-task${isDone?' done-row':''}">
-      <span>${isDone?'✅':(wasMoved?'⏭':'⬜')}</span>
+      <span>${isDone?'✅':(wasMoved?'⏭':(isUpped?'⏫':'⬜'))}</span>
       <span class="mt-type">${t.type}</span>
-      <span class="mt-title">${t.title}${wasMoved?' <span style="color:#e05b8a;font-size:.72rem;font-weight:800">(MOVED)</span>':''}</span>
+      <span class="mt-title">${t.title}${tag}</span>
       <span class="mt-time">${fmt(effMins(t))}</span>
       ${wasMoved?'<button class="btn mini-undo" data-undo="'+t.id+'">↩ Wapas</button>':''}
       ${canPull?'<button class="btn mini-pull" data-pull="'+t.id+'">⏫ Aaj karo</button>':''}
@@ -590,7 +601,14 @@
     });
     list.querySelectorAll('[data-move]').forEach(b=>{
       b.addEventListener('click', ()=>{
-        moves[b.dataset.move] = currentDay + 1;   // "I'll do this next day"
+        const id = b.dataset.move;
+        if(baseDayOf[id] > currentDay){
+          /* ye lecture upar aaya tha — wapas niche bhejo apni jagah pe (REPLACED) */
+          delete moves[id];
+          replaced.add(id); saveReplaced();
+        } else {
+          moves[id] = currentDay + 1;   // "I'll do this next day"
+        }
         saveMoves(); render();
       });
     });
@@ -612,6 +630,7 @@
     list.querySelectorAll('[data-pull]').forEach(b=>{
       b.addEventListener('click', ()=>{
         moves[b.dataset.pull] = currentDay;
+        replaced.delete(b.dataset.pull); saveReplaced();
         saveMoves(); render();
       });
     });
