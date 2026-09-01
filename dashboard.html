@@ -174,7 +174,7 @@
       for(let i=1;i<=ch.v;i++){
         lecNo++;
         const L = ch.lectures && ch.lectures[i-1];   // real lecture data if available
-        const lecMins = L ? L.d : 70 + ((lecNo*37 + ci*11) % 45);  // real duration, else estimate
+        const lecMins = L ? L.d : 105 + ((lecNo*37 + ci*11) % 30);  // real duration, else ~2h avg (from real samples)
         const title = L
           ? ch.name + ' ' + String(i).padStart(2,'0') + ' : ' + L.t
           : String(lecNo).padStart(2,'0') + ' : ' + ch.name + (ch.v>1 ? ' (Lecture ' + String(i).padStart(2,'0') + ')' : '');
