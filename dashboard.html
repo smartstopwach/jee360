@@ -238,6 +238,7 @@
       <button class="f-btn" data-range="30">30 Din</button>
       <button class="f-btn" data-range="0" id="fullBtn">Pura Plan</button>
     </div>
+    <div id="listNav"></div>
     <div id="taskList"></div>
     <div id="chartCard"></div>
     <p class="plan-sub" id="movedNote" style="margin-top:14px"></p>
@@ -500,6 +501,7 @@
   /* ---------------- RENDER ---------------- */
   let viewRange = 3;   // 3 | 7 | 0 (0 = full plan)
   let chartOffset = 0; // graph kitne din piche dekh raha hai (0 = aaj tak)
+  let listOffset  = 0; // schedule list kitne din piche dekh rahi hai (0 = aaj se)
 
   const sdt = d => new Date(startDate.getTime()+(d-1)*86400000)
     .toLocaleDateString('en-IN',{day:'numeric',month:'short'});
@@ -652,8 +654,27 @@
     allTasks.forEach(t=>{ const d=dayOf(t); (byDay[d] = byDay[d]||[]).push(t); });
 
     let startD, endD;
+    listOffset = Math.max(0, Math.min(listOffset, currentDay - 1));
     if(viewRange === 0){ startD = 1; endD = days; }
-    else { startD = currentDay; endD = Math.min(days, currentDay + viewRange - 1); }
+    else { startD = Math.max(1, currentDay - listOffset); endD = Math.min(days, startD + viewRange - 1); }
+    /* list ke upar arrows: filter jitna set hai utne din piche/aage (history read-only) */
+    const lnav = document.getElementById('listNav');
+    if(viewRange === 0){ lnav.innerHTML = ''; }
+    else {
+      const lPrev = startD > 1, lNext = listOffset > 0;
+      lnav.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin:4px 2px 10px">' +
+          '<button class="ch-nav" data-lprev' + (lPrev?'':' disabled') + '>‹</button>' +
+          '<span style="font-size:.82rem;color:#7a83a8;font-weight:700">' +
+            (listOffset>0 ? '📜 History · ' : '') + sdt(startD) + ' – ' + sdt(endD) +
+            (listOffset>0 ? '' : ' (aaj se)') + '</span>' +
+          '<button class="ch-nav" data-lnext' + (lNext?'':' disabled') + '>›</button>' +
+        '</div>';
+      const lp = lnav.querySelector('[data-lprev]');
+      if(lp) lp.addEventListener('click', ()=>{ listOffset += viewRange; render(); });
+      const ln = lnav.querySelector('[data-lnext]');
+      if(ln) ln.addEventListener('click', ()=>{ listOffset = Math.max(0, listOffset - viewRange); render(); });
+    }
 
     let html = '';
     for(let d = startD; d <= endD; d++){
@@ -724,9 +745,9 @@
     document.getElementById('chartCard').innerHTML = chartHTML(chS, chE, chHdr);
     const cc = document.getElementById('chartCard');
     const pv = cc.querySelector('[data-chprev]');
-    if(pv) pv.addEventListener('click', ()=>{ chartOffset++; render(); });
+    if(pv) pv.addEventListener('click', ()=>{ chartOffset += viewRange; render(); });
     const nx = cc.querySelector('[data-chnext]');
-    if(nx) nx.addEventListener('click', ()=>{ chartOffset = Math.max(0, chartOffset-1); render(); });
+    if(nx) nx.addEventListener('click', ()=>{ chartOffset = Math.max(0, chartOffset - viewRange); render(); });
 
     /* moved-to-tomorrow note + undo all */
     const movedIds = Object.keys(moves).filter(id => moves[id] === currentDay+1 && !done.has(id));
@@ -824,7 +845,7 @@
       document.querySelectorAll('.f-btn').forEach(x=>x.classList.remove('active'));
       b.classList.add('active');
       viewRange = +b.dataset.range;
-      chartOffset = 0;
+      chartOffset = 0; listOffset = 0;
       render();
     });
   });
