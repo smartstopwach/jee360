@@ -111,21 +111,31 @@ window.JEE360_DATA = {
       ]
     },
 
-    /* ============ PHYSICAL CHEMISTRY — estimates ============ */
+    /* ============ PHYSICAL CHEMISTRY — REAL DATA ✓ ============
+       Source: batch page (All Contents: 97 videos, 64 exercises,
+       213 notes incl. extras). Chapters only:
+       96 lecture videos + 61 chapter DPPs.
+       Durations per lecture: pending */
     pc: {
       name: "Physical Chemistry",
       teacher: "Faisal Razaq Sir",
-      estimated: true,
-      lec: 85,
-      prac: 45,
+      estimated: false,
+      durationsPending: true,
+      lec: 120,  // ~96 lectures × ~75 min avg (until real durations arrive)
+      prac: 41,  // ~61 DPPs × ~40 min avg
       chapters: [
-        { no:1, name:"Mole Concept", v:5, e:5, n:0 },
-        { no:2, name:"Atomic Structure", v:4, e:4, n:0 },
-        { no:3, name:"Thermodynamics & Thermochemistry", v:5, e:5, n:0 },
-        { no:4, name:"Chemical & Ionic Equilibrium", v:5, e:5, n:0 },
-        { no:5, name:"Electrochemistry", v:4, e:4, n:0 },
-        { no:6, name:"Chemical Kinetics", v:4, e:4, n:0 },
-        { no:7, name:"Solutions & Solid State", v:4, e:4, n:0 }
+        { no:1,  name:"Some Basic Concepts of Chemistry", v:16, e:10, n:26 },
+        { no:2,  name:"Redox Reaction",                   v:8,  e:3,  n:11 },
+        { no:3,  name:"Solutions",                        v:11, e:5,  n:16 },
+        { no:4,  name:"Chemical Kinetics",                v:10, e:8,  n:17 },
+        { no:5,  name:"Thermodynamics",                   v:13, e:12, n:25 },
+        { no:6,  name:"Chemical Equilibrium",             v:5,  e:4,  n:9  },
+        { no:7,  name:"Ionic Equilibrium",                v:6,  e:5,  n:11 },
+        { no:8,  name:"Structure of Atom",                v:9,  e:3,  n:12 },
+        { no:9,  name:"Electrochemistry",                 v:8,  e:6,  n:14 },
+        { no:10, name:"The Solid State",                  v:5,  e:5,  n:10 },
+        { no:11, name:"States of Matter",                 v:4,  e:0,  n:4  },
+        { no:12, name:"Surface Chemistry",                v:1,  e:0,  n:1  }
       ]
     },
 
