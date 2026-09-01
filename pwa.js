@@ -65,13 +65,13 @@
     a.id = 'jeeContinue';
     a.innerHTML = '▶&nbsp; Planner continue karo';
     a.style.cssText =
-      'position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:9998;' +
-      'display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:99px;' +
+      'position:fixed;right:18px;bottom:96px;z-index:9998;' +
+      'display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:99px;' +
       'background:linear-gradient(135deg,#22d3ee,#3b82f6);color:#fff;font-weight:800;' +
-      'font-size:.95rem;font-family:inherit;text-decoration:none;white-space:nowrap;' +
+      'font-size:.9rem;font-family:inherit;text-decoration:none;white-space:nowrap;' +
       'box-shadow:0 6px 24px rgba(59,130,246,.45);transition:transform .15s,box-shadow .15s;';
-    a.onmouseenter = () => { a.style.transform = 'translateX(-50%) scale(1.05)'; a.style.boxShadow = '0 8px 30px rgba(59,130,246,.6)'; };
-    a.onmouseleave = () => { a.style.transform = 'translateX(-50%)'; a.style.boxShadow = '0 6px 24px rgba(59,130,246,.45)'; };
+    a.onmouseenter = () => { a.style.transform = 'scale(1.05)'; a.style.boxShadow = '0 8px 30px rgba(59,130,246,.6)'; };
+    a.onmouseleave = () => { a.style.transform = 'none'; a.style.boxShadow = '0 6px 24px rgba(59,130,246,.45)'; };
     document.body.appendChild(a);
   }
   if(document.readyState === 'loading')
