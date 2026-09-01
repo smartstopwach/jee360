@@ -4,7 +4,7 @@
    (pehle cache se turant serve → background mein fresh version
     update → agli baar naya mile. Offline pe bhi sab chalta hai.)
    ============================================================ */
-const CACHE = 'jee360-v20';
+const CACHE = 'jee360-v21';
 
 const PRECACHE = [
   './',
@@ -88,5 +88,42 @@ self.addEventListener('fetch', e => {
         return cached || fresh;
       })
     )
+  );
+});
+
+/* ============================================================
+   Push notifications — FCM data messages ko style ke saath
+   dikhana (icon, badge, action buttons, tap = dashboard)
+   ============================================================ */
+self.addEventListener('push', e => {
+  let p = {};
+  try { p = e.data ? e.data.json() : {}; } catch(_){}
+  const d = p.data || p.notification || p;
+  if(!d || !d.title) return;
+  e.waitUntil(self.registration.showNotification(d.title, {
+    body: d.body || '',
+    icon: 'icon-192.png',
+    badge: 'icon-192.png',
+    tag: d.tag || 'jee360',
+    renotify: true,
+    data: { url: d.url || './dashboard.html' },
+    actions: [
+      { action: 'open',  title: '📖 Padhne chalo' },
+      { action: 'later', title: '✕ Baad me' }
+    ]
+  }));
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  if(e.action === 'later') return;
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for(const c of list){
+        if(c.url.indexOf('dashboard') !== -1 && 'focus' in c) return c.focus();
+      }
+      return clients.openWindow(
+        (e.notification.data && e.notification.data.url) || './dashboard.html');
+    })
   );
 });

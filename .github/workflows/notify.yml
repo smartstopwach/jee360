@@ -1,0 +1,29 @@
+name: Daily notifications
+
+on:
+  schedule:
+    - cron: '0 2 * * *'     # 07:30 IST — aaj ka plan
+    - cron: '30 8 * * *'    # 14:00 IST — half-time check (smart)
+    - cron: '30 15 * * *'   # 21:00 IST — last call / shabashi
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: 'morning / afternoon / night'
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Send notifications
+        run: node scripts/notify.js
+        env:
+          FCM_SA: ${{ secrets.FCM_SA }}
+          SLOT: ${{ github.event.inputs.slot }}

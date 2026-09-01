@@ -690,6 +690,20 @@
       <div class="tp-bar"><i style="width:${tpPct}%"></i></div>`;
     document.getElementById('fullBtn').textContent = 'Pura Plan (' + days + ' din)';
 
+    /* push notifications ke liye LIVE accurate summary —
+       cloud notify script bilkul yahi object padhta hai */
+    const pDppN = todayAll.filter(t=>t.dpp && !done.has(t.dpp.id)).length;
+    window.__today = {
+      day: currentDay, days: days, date: dateFor(currentDay),
+      pendingLec: todayPending.length, pendingDpp: pDppN,
+      leftMins: Math.round(leftMins),
+      schedTotal: todaySched.length, schedDone: todayDone.length,
+      doneMins: Math.round(tpDone), totMins: Math.round(tpTot),
+      pct: tpPct, pctAll: pctToday,
+      backlog: allTasks.filter(t=>dayOf(t) < currentDay && !done.has(t.id)).length,
+      subjects: [...new Set(todayPending.map(t=>CURRICULUM[t.subj].name))].slice(0,4)
+    };
+
     /* group tasks by their scheduled day */
     const byDay = {};
     allTasks.forEach(t=>{ const d=dayOf(t); (byDay[d] = byDay[d]||[]).push(t); });
@@ -931,5 +945,6 @@
 <script src="firebase-config.js"></script>
 <script src="sync.js"></script>
 <script src="pwa.js"></script>
+<script src="push.js"></script>
 </body>
 </html>
