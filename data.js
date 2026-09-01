@@ -180,25 +180,49 @@ window.JEE360_DATA = {
       ]
     },
 
-    /* ============ MATHEMATICS — estimates ============ */
+    /* ============ MATHEMATICS — REAL DATA ✓ ============
+       Source: batch page (All Contents: 174 videos, 175 exercises,
+       552 notes incl. extras). Chapters only:
+       173 lecture videos + 164 chapter DPPs.
+       Durations per lecture: pending */
     math: {
       name: "Mathematics",
       teacher: "Sachin Jakhar Sir",
-      estimated: true,
-      lec: 240,
-      prac: 120,
+      estimated: false,
+      durationsPending: true,
+      lec: 216,  // ~173 lectures × ~75 min avg (until real durations arrive)
+      prac: 109, // ~164 DPPs × ~40 min avg
       chapters: [
-        { no:1,  name:"Basic Maths & Quadratics", v:5, e:5, n:0 },
-        { no:2,  name:"Sequence & Series", v:4, e:4, n:0 },
-        { no:3,  name:"Trigonometry", v:5, e:5, n:0 },
-        { no:4,  name:"Straight Lines & Circles", v:6, e:6, n:0 },
-        { no:5,  name:"Conic Sections", v:5, e:5, n:0 },
-        { no:6,  name:"Permutations & Probability", v:5, e:5, n:0 },
-        { no:7,  name:"Matrices & Determinants", v:4, e:4, n:0 },
-        { no:8,  name:"Limits, Continuity & Differentiability", v:6, e:6, n:0 },
-        { no:9,  name:"Application of Derivatives", v:4, e:4, n:0 },
-        { no:10, name:"Integration & AOI", v:6, e:6, n:0 },
-        { no:11, name:"Vectors & 3D", v:5, e:5, n:0 }
+        { no:1,  name:"Basic Maths",                            v:12, e:11, n:23 },
+        { no:2,  name:"Quadratic Equations",                    v:8,  e:8,  n:16 },
+        { no:3,  name:"Sequence & Series",                      v:9,  e:9,  n:18 },
+        { no:4,  name:"Trigonometric Functions",                v:8,  e:5,  n:13 },
+        { no:5,  name:"Trigonometric Equations",                v:5,  e:4,  n:9  },
+        { no:6,  name:"Determinants",                           v:6,  e:7,  n:13 },
+        { no:7,  name:"Matrices",                               v:5,  e:5,  n:10 },
+        { no:8,  name:"Sets",                                   v:3,  e:2,  n:5  },
+        { no:9,  name:"Relations & Functions",                  v:12, e:13, n:25 },
+        { no:10, name:"Inverse Trigonometric Functions",        v:6,  e:6,  n:12 },
+        { no:11, name:"Limit, Continuity & Differentiability",  v:10, e:10, n:20 },
+        { no:12, name:"Method Of Differentiation",              v:3,  e:4,  n:7  },
+        { no:13, name:"Application Of Derivatives",             v:10, e:9,  n:19 },
+        { no:14, name:"Indefinite Integration",                 v:6,  e:5,  n:11 },
+        { no:15, name:"Definite Integration",                   v:5,  e:4,  n:9  },
+        { no:16, name:"Application Of Integrals",               v:2,  e:2,  n:4  },
+        { no:17, name:"Differential Equation",                  v:5,  e:5,  n:10 },
+        { no:18, name:"Straight Lines",                         v:8,  e:8,  n:16 },
+        { no:19, name:"Statistics",                             v:1,  e:1,  n:2  },
+        { no:20, name:"Circles",                                v:7,  e:6,  n:13 },
+        { no:21, name:"Solution Of Triangle",                   v:3,  e:2,  n:5  },
+        { no:22, name:"Parabola",                               v:5,  e:5,  n:10 },
+        { no:23, name:"Ellipse",                                v:5,  e:4,  n:9  },
+        { no:24, name:"Hyperbola",                              v:4,  e:5,  n:9  },
+        { no:25, name:"Vector Algebra",                         v:4,  e:4,  n:8  },
+        { no:26, name:"Three Dimensional Geometry",             v:5,  e:4,  n:9  },
+        { no:27, name:"Binomial Theorem",                       v:3,  e:3,  n:6  },
+        { no:28, name:"Permutation & Combination",              v:6,  e:5,  n:11 },
+        { no:29, name:"Probability",                            v:4,  e:5,  n:9  },
+        { no:30, name:"Complex Numbers",                        v:3,  e:3,  n:6  }
       ]
     }
   }
