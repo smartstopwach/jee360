@@ -49,4 +49,32 @@
   if(document.readyState === 'loading')
     document.addEventListener('DOMContentLoaded', wire);
   else wire();
+
+  /* ============================================================
+     Continue session: plan bana hua hai aur user dashboard ke
+     alawa kisi bhi page pe hai (front page, chapters, planner...)
+     → floating "Planner continue karo" button → click = dashboard
+     ============================================================ */
+  function continueBtn(){
+    let hasPlan = false;
+    try{ hasPlan = !!localStorage.getItem('jee360.plan'); }catch(e){}
+    const onDash = /dashboard\.html/i.test(location.pathname);
+    if(!hasPlan || onDash) return;
+    const a = document.createElement('a');
+    a.href = 'dashboard.html';
+    a.id = 'jeeContinue';
+    a.innerHTML = '▶&nbsp; Planner continue karo';
+    a.style.cssText =
+      'position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:9998;' +
+      'display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:99px;' +
+      'background:linear-gradient(135deg,#22d3ee,#3b82f6);color:#fff;font-weight:800;' +
+      'font-size:.95rem;font-family:inherit;text-decoration:none;white-space:nowrap;' +
+      'box-shadow:0 6px 24px rgba(59,130,246,.45);transition:transform .15s,box-shadow .15s;';
+    a.onmouseenter = () => { a.style.transform = 'translateX(-50%) scale(1.05)'; a.style.boxShadow = '0 8px 30px rgba(59,130,246,.6)'; };
+    a.onmouseleave = () => { a.style.transform = 'translateX(-50%)'; a.style.boxShadow = '0 6px 24px rgba(59,130,246,.45)'; };
+    document.body.appendChild(a);
+  }
+  if(document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', continueBtn);
+  else continueBtn();
 })();
