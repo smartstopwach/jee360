@@ -129,21 +129,29 @@ window.JEE360_DATA = {
       ]
     },
 
-    /* ============ ORGANIC CHEMISTRY — estimates ============ */
+    /* ============ ORGANIC CHEMISTRY — REAL DATA ✓ ============
+       Source: batch page (All Contents: 89 videos, 62 exercises,
+       221 notes incl. extras). Chapters only:
+       73 lecture videos + 62 chapter DPPs.
+       Durations per lecture: pending */
     oc: {
       name: "Organic Chemistry",
       teacher: "Pankaj Sijariya Sir",
-      estimated: true,
-      lec: 95,
-      prac: 50,
+      estimated: false,
+      durationsPending: true,
+      lec: 91,   // ~73 lectures × ~75 min avg (until real durations arrive)
+      prac: 41,  // ~62 DPPs × ~40 min avg
       chapters: [
-        { no:1, name:"GOC - 1 & 2", v:6, e:6, n:0 },
-        { no:2, name:"Isomerism", v:4, e:4, n:0 },
-        { no:3, name:"Hydrocarbons", v:5, e:5, n:0 },
-        { no:4, name:"Haloalkanes & Haloarenes", v:4, e:4, n:0 },
-        { no:5, name:"Alcohols, Phenols & Ethers", v:4, e:4, n:0 },
-        { no:6, name:"Aldehydes, Ketones & Acids", v:5, e:5, n:0 },
-        { no:7, name:"Amines & Biomolecules", v:4, e:4, n:0 }
+        { no:1,  name:"Some Basic Principles and Techniques: IUPAC Nomenclature", v:5,  e:5,  n:10 },
+        { no:2,  name:"Some Basic Principles and Techniques: Isomerism",          v:13, e:11, n:24 },
+        { no:3,  name:"Some Basic Principles and Techniques: General Organic Chemistry", v:14, e:12, n:26 },
+        { no:4,  name:"Reaction Mechanism",                                       v:23, e:20, n:43 },
+        { no:5,  name:"Name Reactions",                                           v:7,  e:6,  n:13 },
+        { no:6,  name:"Practical Organic Chemistry",                              v:4,  e:3,  n:7  },
+        { no:7,  name:"Biomolecules",                                             v:3,  e:2,  n:5  },
+        { no:8,  name:"Polymers",                                                 v:1,  e:1,  n:2  },
+        { no:9,  name:"Environmental Chemistry",                                  v:1,  e:1,  n:2  },
+        { no:10, name:"Chemistry in Everyday Life",                               v:2,  e:1,  n:3  }
       ]
     },
 
