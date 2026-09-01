@@ -147,20 +147,28 @@ window.JEE360_DATA = {
       ]
     },
 
-    /* ============ INORGANIC CHEMISTRY — estimates ============ */
+    /* ============ INORGANIC CHEMISTRY — REAL DATA ✓ ============
+       Source: batch page (All Contents: 76 videos, 41 exercises,
+       176 notes incl. extras). Chapters only, as requested:
+       68 lecture videos + 41 chapter DPPs.
+       Durations per lecture: pending */
     ioc: {
       name: "Inorganic Chemistry",
       teacher: "Kunwar Om Pandey Sir",
-      estimated: true,
-      lec: 70,
-      prac: 35,
+      estimated: false,
+      durationsPending: true,
+      lec: 85,   // ~68 lectures × ~75 min avg (until real durations arrive)
+      prac: 27,  // ~41 DPPs × ~40 min avg
       chapters: [
-        { no:1, name:"Periodic Table & Properties", v:4, e:4, n:0 },
-        { no:2, name:"Chemical Bonding", v:6, e:6, n:0 },
-        { no:3, name:"p-Block Elements", v:5, e:5, n:0 },
-        { no:4, name:"d & f Block", v:3, e:3, n:0 },
-        { no:5, name:"Coordination Compounds", v:5, e:5, n:0 },
-        { no:6, name:"Salt Analysis", v:3, e:3, n:0 }
+        { no:1, name:"Periodic Table",                              v:10, e:9,  n:19 },
+        { no:2, name:"Chemical Bonding",                            v:20, e:12, n:32 },
+        { no:3, name:"Coordination Compounds",                      v:14, e:10, n:24 },
+        { no:4, name:"P-block Elements",                            v:7,  e:0,  n:7  },
+        { no:5, name:"The d and f-Block Elements",                  v:6,  e:4,  n:10 },
+        { no:6, name:"Principles of Qualitative Analysis: Salt analysis", v:6, e:4, n:11 },
+        { no:7, name:"Metallurgy",                                  v:1,  e:0,  n:1  },
+        { no:8, name:"S Block",                                     v:3,  e:1,  n:4  },
+        { no:9, name:"Hydrogen",                                    v:1,  e:1,  n:2  }
       ]
     },
 
