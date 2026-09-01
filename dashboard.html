@@ -240,6 +240,7 @@
     </div>
     <div id="listNav"></div>
     <div id="taskList"></div>
+    <div id="listNavBottom"></div>
     <div id="chartCard"></div>
     <p class="plan-sub" id="movedNote" style="margin-top:14px"></p>
   </main>
@@ -654,26 +655,38 @@
     allTasks.forEach(t=>{ const d=dayOf(t); (byDay[d] = byDay[d]||[]).push(t); });
 
     let startD, endD;
-    listOffset = Math.max(0, Math.min(listOffset, currentDay - 1));
-    if(viewRange === 0){ startD = 1; endD = days; }
-    else { startD = Math.max(1, currentDay - listOffset); endD = Math.min(days, startD + viewRange - 1); }
-    /* list ke upar arrows: filter jitna set hai utne din piche/aage (history read-only) */
-    const lnav = document.getElementById('listNav');
-    if(viewRange === 0){ lnav.innerHTML = ''; }
+    if(viewRange === 0){ startD = 1; endD = days; listOffset = 0; }
     else {
-      const lPrev = startD > 1, lNext = listOffset > 0;
-      lnav.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin:4px 2px 10px">' +
+      /* offset dono taraf: +ve = past (history), -ve = future (aage ka plan) */
+      startD = currentDay - listOffset;
+      startD = Math.max(1, Math.min(startD, Math.max(1, days - viewRange + 1)));
+      listOffset = currentDay - startD;
+      endD = Math.min(days, startD + viewRange - 1);
+    }
+    /* nav arrows — list ke UPAR aur NICHE dono: filter jitna jump */
+    const navTop = document.getElementById('listNav');
+    const navBot = document.getElementById('listNavBottom');
+    if(viewRange === 0){ navTop.innerHTML = ''; navBot.innerHTML = ''; }
+    else {
+      const lPrev = startD > 1, lNext = endD < days;
+      const tag = listOffset > 0 ? '📜 History · '
+                : listOffset < 0 ? '🔮 Aage ka plan · ' : '';
+      const suffix = listOffset === 0 ? ' (aaj se)' : '';
+      const navHTML = (mt)=>
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin:' + mt + '">' +
           '<button class="ch-nav" data-lprev' + (lPrev?'':' disabled') + '>‹</button>' +
           '<span style="font-size:.82rem;color:#7a83a8;font-weight:700">' +
-            (listOffset>0 ? '📜 History · ' : '') + sdt(startD) + ' – ' + sdt(endD) +
-            (listOffset>0 ? '' : ' (aaj se)') + '</span>' +
+            tag + sdt(startD) + ' – ' + sdt(endD) + suffix + '</span>' +
           '<button class="ch-nav" data-lnext' + (lNext?'':' disabled') + '>›</button>' +
         '</div>';
-      const lp = lnav.querySelector('[data-lprev]');
-      if(lp) lp.addEventListener('click', ()=>{ listOffset += viewRange; render(); });
-      const ln = lnav.querySelector('[data-lnext]');
-      if(ln) ln.addEventListener('click', ()=>{ listOffset = Math.max(0, listOffset - viewRange); render(); });
+      navTop.innerHTML = navHTML('4px 2px 10px');
+      navBot.innerHTML = navHTML('12px 2px 4px');
+      [navTop, navBot].forEach(nv=>{
+        const lp = nv.querySelector('[data-lprev]');
+        if(lp) lp.addEventListener('click', ()=>{ listOffset += viewRange; render(); });
+        const ln = nv.querySelector('[data-lnext]');
+        if(ln) ln.addEventListener('click', ()=>{ listOffset -= viewRange; render(); });
+      });
     }
 
     let html = '';
