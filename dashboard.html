@@ -381,6 +381,13 @@
     packedDay = {};
     const futureDaysCnt = days - currentDay;
     if(futureDaysCnt <= 0) return;
+    /* Reshuffle SIRF tab jab aage ka kaam pehle hua ho (future lec done,
+       ya "Aaj karo" se pull kiya ho). Warna plan bilkul stable rehta hai:
+       "Next day" move = us din normal load + 1, backlog = agle din +1.
+       Koi automatic redistribution nahi. */
+    const workedAhead = allTasks.some(t =>
+      baseDayOf[t.id] > currentDay && (done.has(t.id) || moves[t.id] <= currentDay));
+    if(!workedAhead) return;
     const packable = allTasks.filter(t =>
       !done.has(t.id) && !(t.id in moves) && baseDayOf[t.id] > currentDay);
     let rem = packable.reduce((s,t)=>s+effMins(t),0);
