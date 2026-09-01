@@ -131,8 +131,10 @@
       <h2>TODAY'S STUDY PLAN</h2>
       <span class="total-time" id="todayTotal">🕐 —</span>
     </div>
+    <p class="day-goal" id="dayLine"></p>
     <p class="plan-sub" id="planSub"></p>
     <div id="taskList"></div>
+    <p class="plan-sub" id="movedNote" style="margin-top:14px"></p>
   </main>
 
   <aside>
@@ -218,28 +220,30 @@
 
   const effMins = t => t.scaled ? t.mins/speed : t.mins;
   const totalEffMins = allTasks.reduce((s,t)=>s+effMins(t),0);
-  const quota = totalEffMins / days;
+  const quota = totalEffMins / days;   // DAILY GOAL (mins/day)
 
-  /* today's list: stored per date */
-  const todayKey = new Date().toISOString().slice(0,10);
-  let todayIds = null;
-  try{
-    const saved = JSON.parse(localStorage.getItem('jee360.today')||'null');
-    if(saved && saved.date===todayKey) todayIds = saved.ids;
-  }catch(e){}
-
-  function pickToday(){
-    const ids=[]; let acc=0;
+  /* ---------- 90/120-DAY PATH ----------
+     Fill each day with ~quota minutes of tasks, in order.
+     Every task gets a base day (1..days). Deterministic. */
+  const baseDayOf = {};
+  { let d = 1, acc = 0;
     for(const t of allTasks){
-      if(done.has(t.id)) continue;
-      ids.push(t.id); acc += effMins(t);
-      if(acc >= quota && ids.length>=3) break;
+      baseDayOf[t.id] = Math.min(d, days);
+      acc += effMins(t);
+      if(acc >= quota * d && d < days) d++;
     }
-    return ids;
   }
-  if(!todayIds){ todayIds = pickToday();
-    localStorage.setItem('jee360.today', JSON.stringify({date:todayKey, ids:todayIds})); }
-  const saveToday = ()=> localStorage.setItem('jee360.today', JSON.stringify({date:todayKey, ids:todayIds}));
+
+  /* moves: task moved to a later day ("I'll do this next day") */
+  let moves = {};
+  try{ moves = JSON.parse(localStorage.getItem('jee360.moves')||'{}'); }catch(e){}
+  const saveMoves = ()=> localStorage.setItem('jee360.moves', JSON.stringify(moves));
+  const dayOf = t => moves[t.id] || baseDayOf[t.id];
+
+  /* current day of the plan (from start date) */
+  const startDate = new Date((plan.startDate || new Date().toISOString().slice(0,10)) + 'T00:00:00');
+  const currentDay = Math.max(1, Math.min(days,
+    Math.floor((Date.now() - startDate.getTime()) / 86400000) + 1));
 
   const taskById = {}; allTasks.forEach(t=>taskById[t.id]=t);
 
@@ -251,24 +255,29 @@
 
   /* ---------------- RENDER ---------------- */
   function render(){
-    const todayTasks = todayIds.map(id=>taskById[id]).filter(Boolean);
+    /* today = tasks scheduled up to current day (incl. backlog) */
+    const todayTasks = allTasks.filter(t=>dayOf(t) <= currentDay);
     const pendingToday = todayTasks.filter(t=>!done.has(t.id));
     const leftMins = pendingToday.reduce((s,t)=>s+effMins(t),0);
-    const totMins  = todayTasks.reduce((s,t)=>s+effMins(t),0);
     const pctToday = todayTasks.length? Math.round((todayTasks.length-pendingToday.length)/todayTasks.length*100):0;
 
     document.getElementById('overall').textContent = done.size + ' of ' + allTasks.length + ' done';
-    document.getElementById('todayTotal').textContent = '🕐 ' + fmt(totMins);
+    document.getElementById('todayTotal').textContent = '🕐 ' + fmt(leftMins);
+    document.getElementById('dayLine').innerHTML =
+      '📅 Day <b>' + currentDay + '</b> of <b>' + days + '</b> · Daily goal <b>' + fmt(quota) + '</b>' +
+      ' <span style="color:#8a93b5">at ' + speed + 'x</span>';
     document.getElementById('planSub').innerHTML =
       '<b>' + pctToday + '% completed</b> · ' + pendingToday.length + ' to go · ' +
       fmt(leftMins) + ' left <span style="color:#b6bdd8">at ' + speed + 'x</span>';
 
     const list = document.getElementById('taskList');
     if(!pendingToday.length){
-      list.innerHTML = '<div class="all-done">🎉 All done for today! Come back tomorrow — your streak is safe.</div>';
+      list.innerHTML = '<div class="all-done">🎉 All done for today! Day ' + currentDay + ' complete — come back tomorrow.</div>';
     }else{
       list.innerHTML = pendingToday.map(t=>{
         const s = CURRICULUM[t.subj];
+        const bd = dayOf(t);
+        const backlog = bd < currentDay ? ' · <span style="color:#e05b8a;font-weight:800">BACKLOG · DAY ' + bd + '</span>' : '';
         const timeStr = t.scaled
           ? '🕐 <b>'+fmt(t.mins/speed)+'</b> <small>· '+fmt(t.mins)+' at 1x</small>'
           : '🕐 <b>'+fmt(t.mins)+'</b>';
@@ -276,20 +285,26 @@
         <div class="task">
           <div class="t-top">
             <span><span class="subj">${s.name}</span><span class="teacher">${s.teacher}</span></span>
-            <span class="type">${t.type}</span>
+            <span class="type">${t.type}${backlog}</span>
           </div>
           <h3>${t.title}</h3>
           <p class="chap">${t.chap} ↗</p>
           <div class="t-bottom">
             <span class="time">${timeStr}</span>
             <span class="actions">
-              <button class="btn" data-move="${t.id}">⏭ Move</button>
+              <button class="btn" data-move="${t.id}">⏭ Next day</button>
               <button class="btn done-btn" data-done="${t.id}">✓ Done</button>
             </span>
           </div>
         </div>`;
       }).join('');
     }
+
+    /* moved-to-tomorrow note */
+    const movedTomorrow = Object.keys(moves).filter(id => moves[id] === currentDay+1 && !done.has(id)).length;
+    document.getElementById('movedNote').innerHTML = movedTomorrow
+      ? '⏭ <b>' + movedTomorrow + '</b> task' + (movedTomorrow>1?'s':'') + ' moved to tomorrow (Day ' + (currentDay+1) + ')'
+      : '';
 
     /* sidebar */
     const startDate = new Date(plan.startDate || todayKey);
@@ -320,13 +335,8 @@
     });
     list.querySelectorAll('[data-move]').forEach(b=>{
       b.addEventListener('click', ()=>{
-        const id = b.dataset.move;
-        todayIds = todayIds.filter(x=>x!==id);
-        // pull in next pending task not already in today
-        for(const t of allTasks){
-          if(!done.has(t.id) && !todayIds.includes(t.id) && t.id!==id){ todayIds.push(t.id); break; }
-        }
-        saveToday(); render();
+        moves[b.dataset.move] = currentDay + 1;   // "I'll do this next day"
+        saveMoves(); render();
       });
     });
   }

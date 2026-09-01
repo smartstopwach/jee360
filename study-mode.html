@@ -207,7 +207,7 @@
   }
 
   document.getElementById('startBtn').addEventListener('click', ()=>{
-    plan = { subjects, days, speed, mode };
+    plan = { subjects, days, speed, mode, startDate: new Date().toISOString().slice(0,10) };
     localStorage.setItem('jee360.plan', JSON.stringify(plan));
     window.location.href = 'dashboard.html';
   });
