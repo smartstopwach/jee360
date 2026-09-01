@@ -54,6 +54,47 @@
   }
   .plan-head .total-time{color:#5a6284;font-weight:700;font-size:.95rem;}
   .plan-sub{color:var(--muted);font-size:.85rem;margin:6px 0 18px;}
+  .day-goal{
+    margin-top:10px;font-size:.98rem;color:#4a536e;font-weight:600;
+    background:#eef1fd;border:1px solid #dde3fb;border-radius:10px;
+    padding:10px 16px;display:inline-block;
+  }
+  .day-goal b{color:var(--accent-dark);}
+
+  /* ---------- VIEW FILTER ---------- */
+  .filter-row{display:flex;gap:10px;margin:4px 0 20px;flex-wrap:wrap;}
+  .f-btn{
+    padding:8px 20px;border-radius:999px;border:1.5px solid var(--border);
+    background:#fff;font-weight:700;font-size:.88rem;cursor:pointer;color:#5a6284;
+    transition:all .15s;
+  }
+  .f-btn:hover{border-color:var(--accent);}
+  .f-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+  /* ---------- DAY SECTIONS ---------- */
+  .day-section{margin-bottom:28px;}
+  .day-head{
+    display:flex;justify-content:space-between;align-items:center;
+    font-weight:800;color:#1c2340;padding:10px 16px;
+    background:#eef1fd;border:1px solid #dde3fb;border-radius:12px;
+    margin-bottom:12px;font-size:.95rem;
+  }
+  .day-head .dh-time{color:var(--accent-dark);}
+  .day-section.today .day-head{background:#e2e8ff;border-color:#c9d4fb;}
+  .today-tag{
+    background:var(--accent-dark);color:#fff;padding:2px 10px;border-radius:999px;
+    font-size:.68rem;margin-left:8px;letter-spacing:1.5px;vertical-align:middle;
+  }
+  .mini-task{
+    display:flex;gap:12px;align-items:center;
+    background:#fff;border:1px solid var(--border);border-radius:10px;
+    padding:9px 14px;margin-bottom:8px;font-size:.88rem;color:#4a536e;
+  }
+  .mini-task .mt-type{font-size:.66rem;font-weight:800;color:#9aa3c7;letter-spacing:1px;min-width:56px;}
+  .mini-task .mt-title{flex:1;font-weight:600;}
+  .mini-task .mt-time{color:#8a93b5;font-weight:700;white-space:nowrap;}
+  .mini-task.done-row .mt-title{text-decoration:line-through;color:#b6bdd8;}
+  .day-note{color:#8a93b5;font-size:.82rem;margin:4px 0 0 4px;}
   .plan-sub b{color:var(--ink);}
 
   /* ---------- TASK CARD ---------- */
@@ -133,6 +174,11 @@
     </div>
     <p class="day-goal" id="dayLine"></p>
     <p class="plan-sub" id="planSub"></p>
+    <div class="filter-row">
+      <button class="f-btn active" data-range="3">📅 3 Din</button>
+      <button class="f-btn" data-range="7">7 Din</button>
+      <button class="f-btn" data-range="0" id="fullBtn">Pura Plan</button>
+    </div>
     <div id="taskList"></div>
     <p class="plan-sub" id="movedNote" style="margin-top:14px"></p>
   </main>
@@ -254,51 +300,110 @@
   }
 
   /* ---------------- RENDER ---------------- */
+  /* ---------------- RENDER ---------------- */
+  let viewRange = 3;   // 3 | 7 | 0 (0 = full plan)
+
+  function dateFor(d){
+    const dt = new Date(startDate.getTime() + (d-1)*86400000);
+    return dt.toLocaleDateString('en-IN', {weekday:'short', day:'numeric', month:'short'});
+  }
+  function fullCard(t){
+    const s = CURRICULUM[t.subj];
+    const bd = dayOf(t);
+    const backlog = bd < currentDay ? ' · <span style="color:#e05b8a;font-weight:800">BACKLOG · DAY ' + bd + '</span>' : '';
+    const timeStr = t.scaled
+      ? '🕐 <b>'+fmt(t.mins/speed)+'</b> <small>· '+fmt(t.mins)+' at 1x</small>'
+      : '🕐 <b>'+fmt(t.mins)+'</b>';
+    return `
+    <div class="task">
+      <div class="t-top">
+        <span><span class="subj">${s.name}</span><span class="teacher">${s.teacher}</span></span>
+        <span class="type">${t.type}${backlog}</span>
+      </div>
+      <h3>${t.title}</h3>
+      <p class="chap">${t.chap} ↗</p>
+      <div class="t-bottom">
+        <span class="time">${timeStr}</span>
+        <span class="actions">
+          <button class="btn" data-move="${t.id}">⏭ Next day</button>
+          <button class="btn done-btn" data-done="${t.id}">✓ Done</button>
+        </span>
+      </div>
+    </div>`;
+  }
+  function miniRow(t){
+    const isDone = done.has(t.id);
+    return `<div class="mini-task${isDone?' done-row':''}">
+      <span>${isDone?'✅':'⬜'}</span>
+      <span class="mt-type">${t.type}</span>
+      <span class="mt-title">${t.title}</span>
+      <span class="mt-time">${fmt(effMins(t))}</span>
+    </div>`;
+  }
+
   function render(){
     /* today = tasks scheduled up to current day (incl. backlog) */
-    const todayTasks = allTasks.filter(t=>dayOf(t) <= currentDay);
-    const pendingToday = todayTasks.filter(t=>!done.has(t.id));
-    const leftMins = pendingToday.reduce((s,t)=>s+effMins(t),0);
-    const pctToday = todayTasks.length? Math.round((todayTasks.length-pendingToday.length)/todayTasks.length*100):0;
+    const todayPending = allTasks.filter(t=>dayOf(t) <= currentDay && !done.has(t.id));
+    const todayAll = allTasks.filter(t=>dayOf(t) <= currentDay);
+    const leftMins = todayPending.reduce((s,t)=>s+effMins(t),0);
+    const pctToday = todayAll.length? Math.round((todayAll.length-todayPending.length)/todayAll.length*100):0;
 
     document.getElementById('overall').textContent = done.size + ' of ' + allTasks.length + ' done';
     document.getElementById('todayTotal').textContent = '🕐 ' + fmt(leftMins);
     document.getElementById('dayLine').innerHTML =
-      '📅 Day <b>' + currentDay + '</b> of <b>' + days + '</b> · Daily goal <b>' + fmt(quota) + '</b>' +
-      ' <span style="color:#8a93b5">at ' + speed + 'x</span>';
+      '📅 Day <b>' + currentDay + '</b> of <b>' + days + '</b> · ' + dateFor(currentDay) +
+      ' · Daily goal <b>' + fmt(quota) + '</b> <span style="color:#8a93b5">at ' + speed + 'x</span>';
     document.getElementById('planSub').innerHTML =
-      '<b>' + pctToday + '% completed</b> · ' + pendingToday.length + ' to go · ' +
+      '<b>' + pctToday + '% completed</b> · ' + todayPending.length + ' to go · ' +
       fmt(leftMins) + ' left <span style="color:#b6bdd8">at ' + speed + 'x</span>';
+    document.getElementById('fullBtn').textContent = 'Pura Plan (' + days + ' din)';
+
+    /* group tasks by their scheduled day */
+    const byDay = {};
+    allTasks.forEach(t=>{ const d=dayOf(t); (byDay[d] = byDay[d]||[]).push(t); });
+
+    let startD, endD;
+    if(viewRange === 0){ startD = 1; endD = days; }
+    else { startD = currentDay; endD = Math.min(days, currentDay + viewRange - 1); }
+
+    let html = '';
+    for(let d = startD; d <= endD; d++){
+      const isToday = d === currentDay;
+      let rows = '', headTime = 0, note = '';
+
+      if(isToday){
+        headTime = leftMins;
+        rows = todayPending.length
+          ? todayPending.map(fullCard).join('')
+          : '<div class="all-done">🎉 All done for today! Day ' + d + ' complete — kal milte hain.</div>';
+      }
+      else if(d < currentDay){
+        const tasksD = byDay[d] || [];
+        const doneD = tasksD.filter(t=>done.has(t.id));
+        const pendD = tasksD.length - doneD.length;
+        headTime = doneD.reduce((s,t)=>s+effMins(t),0);
+        rows = doneD.map(miniRow).join('');
+        if(pendD) note = '<p class="day-note">🔴 ' + pendD + ' task' + (pendD>1?'s':'') + ' pending → aaj ke backlog mein</p>';
+        if(!tasksD.length) rows = '<p class="day-note">—</p>';
+      }
+      else {
+        const tasksD = (byDay[d] || []).filter(t=>!done.has(t.id));
+        headTime = tasksD.reduce((s,t)=>s+effMins(t),0);
+        rows = tasksD.length ? tasksD.map(miniRow).join('') : '<p class="day-note">Koi task nahi — buffer day 😌</p>';
+      }
+
+      html += `
+      <div class="day-section${isToday?' today':''}">
+        <div class="day-head">
+          <span>📅 Day ${d} · ${dateFor(d)}${isToday?'<span class="today-tag">AAJ</span>':''}</span>
+          <span class="dh-time">${fmt(headTime)}</span>
+        </div>
+        ${rows}${note}
+      </div>`;
+    }
 
     const list = document.getElementById('taskList');
-    if(!pendingToday.length){
-      list.innerHTML = '<div class="all-done">🎉 All done for today! Day ' + currentDay + ' complete — come back tomorrow.</div>';
-    }else{
-      list.innerHTML = pendingToday.map(t=>{
-        const s = CURRICULUM[t.subj];
-        const bd = dayOf(t);
-        const backlog = bd < currentDay ? ' · <span style="color:#e05b8a;font-weight:800">BACKLOG · DAY ' + bd + '</span>' : '';
-        const timeStr = t.scaled
-          ? '🕐 <b>'+fmt(t.mins/speed)+'</b> <small>· '+fmt(t.mins)+' at 1x</small>'
-          : '🕐 <b>'+fmt(t.mins)+'</b>';
-        return `
-        <div class="task">
-          <div class="t-top">
-            <span><span class="subj">${s.name}</span><span class="teacher">${s.teacher}</span></span>
-            <span class="type">${t.type}${backlog}</span>
-          </div>
-          <h3>${t.title}</h3>
-          <p class="chap">${t.chap} ↗</p>
-          <div class="t-bottom">
-            <span class="time">${timeStr}</span>
-            <span class="actions">
-              <button class="btn" data-move="${t.id}">⏭ Next day</button>
-              <button class="btn done-btn" data-done="${t.id}">✓ Done</button>
-            </span>
-          </div>
-        </div>`;
-      }).join('');
-    }
+    list.innerHTML = html;
 
     /* moved-to-tomorrow note */
     const movedTomorrow = Object.keys(moves).filter(id => moves[id] === currentDay+1 && !done.has(id)).length;
@@ -340,6 +445,15 @@
       });
     });
   }
+
+  document.querySelectorAll('.f-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('.f-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      viewRange = +b.dataset.range;
+      render();
+    });
+  });
 
   render();
 })();
