@@ -1,6 +1,7 @@
 MIT License
 
-Copyright (c) 2026 jee360
+Copyright (c) 2026 Naitik (smartstopwach) — JEE360
+https://github.com/smartstopwach/jee360
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +20,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+Note on third-party services:
+
+This project uses Firebase Authentication and Cloud Firestore (Google LLC)
+for optional sign-in and data synchronisation, and is hosted via GitHub Pages.
+Those services are governed by their respective terms of service. All study
+plan structure, scheduling logic, and site design are original to this project.
+Lecture/chapter metadata referenced in data.js is used solely for personal
+study-planning purposes.
