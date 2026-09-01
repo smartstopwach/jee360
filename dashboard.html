@@ -135,6 +135,8 @@
     color:#b57816;background:#fff;border-radius:8px;font-weight:700;
   }
   .dpp-btn:hover{background:#fdf0d8;}
+  .chart-card{background:#fff;border:1px solid #e8ebf4;border-radius:16px;
+    padding:16px 14px 8px;margin-top:18px;box-shadow:0 2px 10px rgba(20,30,80,.05);}
   .mini-task.done-row .mt-title{text-decoration:line-through;color:#b6bdd8;}
   .day-note{color:#8a93b5;font-size:.82rem;margin:4px 0 0 4px;}
   .plan-sub b{color:var(--ink);}
@@ -233,6 +235,7 @@
       <button class="f-btn" data-range="0" id="fullBtn">Pura Plan</button>
     </div>
     <div id="taskList"></div>
+    <div id="chartCard"></div>
     <p class="plan-sub" id="movedNote" style="margin-top:14px"></p>
   </main>
 
@@ -403,6 +406,11 @@
   try{ replaced = new Set(JSON.parse(localStorage.getItem('jee360.replaced')||'[]')); }catch(e){}
   const saveReplaced = ()=> localStorage.setItem('jee360.replaced', JSON.stringify([...replaced]));
 
+  /* doneLog: kis din kitne lecture hue — graph ke liye. {lectureId: dayNo} */
+  let doneLog = {};
+  try{ doneLog = JSON.parse(localStorage.getItem('jee360.doneLog')||'{}'); }catch(e){}
+  const saveDoneLog = ()=> localStorage.setItem('jee360.doneLog', JSON.stringify(doneLog));
+
   /* current day of the plan (from start date)
      DIN SUBAH 3 BAJE FLIP HOTA HAI — raat 12 se 3 tak jo padhoge,
      wo usi din (pichle wale) mein count hota hai. Late-night grace. */
@@ -466,6 +474,17 @@
   };
 
   const taskById = {}; allTasks.forEach(t=>taskById[t.id]=t);
+
+  /* purane done lectures (feature se pehle ke) — unka din unke schedule se maan lo */
+  {
+    let migr = false;
+    allTasks.forEach(t=>{
+      if(done.has(t.id) && doneLog[t.id] === undefined){
+        doneLog[t.id] = Math.min(bDay(t.id), currentDay); migr = true;
+      }
+    });
+    if(migr) saveDoneLog();
+  }
 
   function fmt(mins){
     mins=Math.round(mins);
@@ -539,6 +558,48 @@
         ? '<button class="btn mini-undo" data-undone="'+t.dpp.id+'">↩ Un-done</button>'
         : '<button class="btn dpp-btn" data-done="'+t.dpp.id+'">✓ Done</button>'}
     </div>`;
+  }
+
+  /* ---- line graph: roz kitne lecture complete kiye ---- */
+  function chartHTML(sD, eD){
+    const end = Math.min(eD, currentDay);
+    if(end < sD) return '';
+    const perDay = {};
+    Object.keys(doneLog).forEach(id=>{
+      if(taskById[id]){ const d = doneLog[id]; perDay[d] = (perDay[d]||0) + 1; }
+    });
+    const ds = [], counts = [];
+    for(let d = sD; d <= end; d++){ ds.push(d); counts.push(perDay[d]||0); }
+    const W=680, H=330, L=52, R=20, T=52, B=54;
+    const maxV = Math.max(4, Math.max.apply(null, counts));
+    const step = Math.ceil(maxV/5);
+    const top = step * Math.ceil(maxV/step);
+    const px = i => L + (W-L-R) * (ds.length===1 ? 0.5 : i/(ds.length-1));
+    const py = v => T + (H-T-B) * (1 - v/top);
+    let grid='', ylab='';
+    for(let v=0; v<=top; v+=step){
+      grid += '<line x1="'+L+'" y1="'+py(v)+'" x2="'+(W-R)+'" y2="'+py(v)+'" stroke="#dde1ea" stroke-width="1"/>';
+      ylab += '<text x="'+(L-9)+'" y="'+(py(v)+4)+'" text-anchor="end" font-size="12" fill="#666">'+v+'</text>';
+    }
+    const shortDate = d => new Date(startDate.getTime()+(d-1)*86400000)
+      .toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    const lblStep = Math.ceil(ds.length/8);
+    let xlab='';
+    ds.forEach((d,i)=>{ if(i%lblStep===0)
+      xlab += '<text x="'+px(i)+'" y="'+(H-B+20)+'" text-anchor="middle" font-size="12" fill="#666">'+shortDate(d)+'</text>'; });
+    const pts = counts.map((c,i)=>px(i)+','+py(c)).join(' ');
+    const line = counts.length>1
+      ? '<polyline points="'+pts+'" fill="none" stroke="#4f81bd" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>' : '';
+    const dots = counts.map((c,i)=>'<circle cx="'+px(i)+'" cy="'+py(c)+'" r="4.2" fill="#4f81bd"/>' +
+      '<text x="'+px(i)+'" y="'+(py(c)-10)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#4f81bd">'+(c||'')+'</text>').join('');
+    return '<div class="chart-card"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;display:block" xmlns="http://www.w3.org/2000/svg">' +
+      '<text x="'+(W/2)+'" y="26" text-anchor="middle" font-size="19" font-weight="800" fill="#2b2b2b">Roz Kitne Lectures Kiye</text>' +
+      grid + ylab + xlab +
+      '<line x1="'+L+'" y1="'+py(0)+'" x2="'+(W-R)+'" y2="'+py(0)+'" stroke="#9aa1ad" stroke-width="1.4"/>' +
+      line + dots +
+      '<text transform="rotate(-90)" x="'+(-(H/2))+'" y="16" text-anchor="middle" font-size="13" fill="#444">Lectures ⟶</text>' +
+      '<text x="'+(W/2)+'" y="'+(H-8)+'" text-anchor="middle" font-size="13" fill="#444">Date ⟶</text>' +
+      '</svg></div>';
   }
 
   function render(){
@@ -633,6 +694,9 @@
 
     const list = document.getElementById('taskList');
     list.innerHTML = html;
+    /* graph PICHLE dinon ka data dikhata hai (filter ke hisaab se) */
+    const chS = viewRange === 0 ? 1 : Math.max(1, currentDay - viewRange + 1);
+    document.getElementById('chartCard').innerHTML = chartHTML(chS, currentDay);
 
     /* moved-to-tomorrow note + undo all */
     const movedIds = Object.keys(moves).filter(id => moves[id] === currentDay+1 && !done.has(id));
@@ -676,7 +740,11 @@
 
     /* events */
     list.querySelectorAll('[data-done]').forEach(b=>{
-      b.addEventListener('click', ()=>{ done.add(b.dataset.done); saveDone(); render(); });
+      b.addEventListener('click', ()=>{
+        done.add(b.dataset.done);
+        if(taskById[b.dataset.done]){ doneLog[b.dataset.done] = currentDay; saveDoneLog(); }
+        saveDone(); render();
+      });
     });
     list.querySelectorAll('[data-move]').forEach(b=>{
       b.addEventListener('click', ()=>{
@@ -702,6 +770,7 @@
     list.querySelectorAll('[data-undone]').forEach(b=>{
       b.addEventListener('click', ()=>{
         done.delete(b.dataset.undone);
+        if(doneLog[b.dataset.undone] !== undefined){ delete doneLog[b.dataset.undone]; saveDoneLog(); }
         saveDone(); render();
       });
     });
@@ -735,6 +804,7 @@
     try{ moves = JSON.parse(localStorage.getItem('jee360.moves')||'{}'); }catch(e){}
     try{ replaced = new Set(JSON.parse(localStorage.getItem('jee360.replaced')||'[]')); }catch(e){}
     try{ rebase = JSON.parse(localStorage.getItem('jee360.rebase')||'{}'); }catch(e){}
+    try{ doneLog = JSON.parse(localStorage.getItem('jee360.doneLog')||'{}'); }catch(e){}
     render();
   });
 
