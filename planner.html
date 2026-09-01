@@ -181,10 +181,8 @@
   };
 
   const PACES = [
-    { days:150, name:'Relaxed Pace',  desc:'Steady coverage with plenty of buffer for revision and tests.' },
-    { days:120, name:'Balanced Pace', desc:'A more manageable daily workload with consistent progress.' },
-    { days:90,  name:'Fast Pace',     desc:'A more intensive plan for students who want to finish faster.' },
-    { days:60,  name:'Sprint',        desc:'Crash-course intensity. Only if you can go all in, every day.' }
+    { days:120, name:'Balanced Pace', desc:'A more manageable daily workload with consistent progress.', tag:'Recommended', cls:'comfortable' },
+    { days:90,  name:'Fast Pace',     desc:'A more intensive plan for students who want to finish faster.', tag:'Not ideal', cls:'notideal' }
   ];
 
   // read selected subjects (fallback: all)
@@ -211,19 +209,11 @@
   function dailyMins(days){
     return (totLec*60/speed + totPrac*60) / days;
   }
-  function tagFor(mins){
-    const h = mins/60;
-    if(h <= 5.5) return ['Comfortable','comfortable'];
-    if(h <= 8)   return ['Balanced','balanced'];
-    if(h <= 11)  return ['Demanding','demanding'];
-    return ['Not ideal','notideal'];
-  }
 
   const paceList = document.getElementById('paceList');
   function renderPaces(){
     paceList.innerHTML = PACES.map(p=>{
       const dm = dailyMins(p.days);
-      const [label, cls] = tagFor(dm);
       return `
         <div class="pace ${p.days===chosenDays?'active':''}" data-days="${p.days}">
           <div>
@@ -231,7 +221,7 @@
             <p class="p-desc">${p.desc}</p>
             <p class="p-daily">about ${fmt(dm)} a day</p>
           </div>
-          <span class="tag ${cls}">${label}</span>
+          <span class="tag ${p.cls}">${p.tag}</span>
         </div>`;
     }).join('');
     paceList.querySelectorAll('.pace').forEach(el=>{
