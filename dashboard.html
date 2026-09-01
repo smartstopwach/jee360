@@ -137,6 +137,10 @@
   .dpp-btn:hover{background:#fdf0d8;}
   .chart-card{background:#fff;border:1px solid #e8ebf4;border-radius:16px;
     padding:16px 14px 8px;margin-top:18px;box-shadow:0 2px 10px rgba(20,30,80,.05);}
+  .ch-nav{width:34px;height:34px;border-radius:50%;border:1.5px solid #d5daea;background:#fff;
+    color:#4f5d9e;font-size:1.15rem;font-weight:800;cursor:pointer;line-height:1;}
+  .ch-nav:hover:not(:disabled){background:#f2f4ff;border-color:#7b88ff;}
+  .ch-nav:disabled{opacity:.35;cursor:default;}
   .mini-task.done-row .mt-title{text-decoration:line-through;color:#b6bdd8;}
   .day-note{color:#8a93b5;font-size:.82rem;margin:4px 0 0 4px;}
   .plan-sub b{color:var(--ink);}
@@ -495,7 +499,10 @@
   /* ---------------- RENDER ---------------- */
   /* ---------------- RENDER ---------------- */
   let viewRange = 3;   // 3 | 7 | 0 (0 = full plan)
+  let chartOffset = 0; // graph kitne din piche dekh raha hai (0 = aaj tak)
 
+  const sdt = d => new Date(startDate.getTime()+(d-1)*86400000)
+    .toLocaleDateString('en-IN',{day:'numeric',month:'short'});
   function dateFor(d){
     const dt = new Date(startDate.getTime() + (d-1)*86400000);
     return dt.toLocaleDateString('en-IN', {weekday:'short', day:'numeric', month:'short'});
@@ -596,7 +603,7 @@
       ? '<polyline points="'+pts+'" fill="none" stroke="#4f81bd" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>' : '';
     const dots = vals.map((v,i)=>'<circle cx="'+px(i)+'" cy="'+py(v)+'" r="4.2" fill="#4f81bd"/>' +
       (v>0 ? '<text x="'+px(i)+'" y="'+(py(v)-9)+'" text-anchor="middle" font-size="9.5" font-weight="700" fill="#4f81bd">'+tiny(v)+'</text>' : '')).join('');
-    return '<div class="chart-card"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;display:block" xmlns="http://www.w3.org/2000/svg">' +
+    return '<div class="chart-card">' + (arguments[2]||'') + '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;display:block" xmlns="http://www.w3.org/2000/svg">' +
       '<text x="'+(W/2)+'" y="26" text-anchor="middle" font-size="19" font-weight="800" fill="#2b2b2b">Roz Kitna Time Padha</text>' +
       grid + ylab + xlab +
       '<line x1="'+L+'" y1="'+py(0)+'" x2="'+(W-R)+'" y2="'+py(0)+'" stroke="#9aa1ad" stroke-width="1.4"/>' +
@@ -698,9 +705,28 @@
 
     const list = document.getElementById('taskList');
     list.innerHTML = html;
-    /* graph PICHLE dinon ka data dikhata hai (filter ke hisaab se) */
-    const chS = viewRange === 0 ? 1 : Math.max(1, currentDay - viewRange + 1);
-    document.getElementById('chartCard').innerHTML = chartHTML(chS, currentDay);
+    /* graph PICHLE dinon ka data dikhata hai (filter ke hisaab se);
+       arrows se ek-ek din aage-piche history dekh sakte ho */
+    chartOffset = Math.max(0, Math.min(chartOffset, currentDay - 1));
+    let chE, chS;
+    if(viewRange === 0){ chS = 1; chE = currentDay; }
+    else { chE = Math.max(1, currentDay - chartOffset); chS = Math.max(1, chE - viewRange + 1); }
+    const canPrev = chS > 1 && viewRange !== 0;
+    const canNext = chartOffset > 0 && viewRange !== 0;
+    const chHdr =
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px 6px">' +
+        '<button class="ch-nav" data-chprev' + (canPrev?'':' disabled') + '>‹</button>' +
+        '<span style="font-size:.8rem;color:#7a83a8;font-weight:700">' +
+          (chartOffset>0 ? '📜 History · ' : '') + sdt(chS) + ' – ' + sdt(chE) +
+          (chartOffset>0 ? '' : ' (aaj tak)') + '</span>' +
+        '<button class="ch-nav" data-chnext' + (canNext?'':' disabled') + '>›</button>' +
+      '</div>';
+    document.getElementById('chartCard').innerHTML = chartHTML(chS, chE, chHdr);
+    const cc = document.getElementById('chartCard');
+    const pv = cc.querySelector('[data-chprev]');
+    if(pv) pv.addEventListener('click', ()=>{ chartOffset++; render(); });
+    const nx = cc.querySelector('[data-chnext]');
+    if(nx) nx.addEventListener('click', ()=>{ chartOffset = Math.max(0, chartOffset-1); render(); });
 
     /* moved-to-tomorrow note + undo all */
     const movedIds = Object.keys(moves).filter(id => moves[id] === currentDay+1 && !done.has(id));
@@ -798,6 +824,7 @@
       document.querySelectorAll('.f-btn').forEach(x=>x.classList.remove('active'));
       b.classList.add('active');
       viewRange = +b.dataset.range;
+      chartOffset = 0;
       render();
     });
   });
