@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JEE360 — Your Complete JEE Companion</title>
+<style>
+  :root{
+    --bg:#0b1020;
+    --bg2:#101736;
+    --card:#151d3f;
+    --card-hover:#1a2450;
+    --text:#eef1fb;
+    --muted:#9aa3c7;
+    --accent:#6c8cff;
+    --accent2:#22d3ee;
+    --phy:#38bdf8;
+    --oc:#4ade80;
+    --pc:#fbbf24;
+    --ioc:#f472b6;
+    --math:#a78bfa;
+    --radius:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  /* ---------- NAVBAR ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 6%;
+    background:rgba(11,16,32,.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.35rem;letter-spacing:.5px;}
+  .logo-badge{
+    width:38px;height:38px;border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.1rem;color:#0b1020;font-weight:900;
+  }
+  .logo span em{font-style:normal;color:var(--accent2);}
+  .nav-links{display:flex;gap:26px;list-style:none;align-items:center;}
+  .nav-links a{color:var(--muted);text-decoration:none;font-size:.95rem;font-weight:600;transition:color .2s;}
+  .nav-links a:hover{color:var(--text);}
+  .btn{
+    display:inline-block;padding:10px 22px;border-radius:999px;
+    font-weight:700;text-decoration:none;font-size:.95rem;
+    transition:transform .15s, box-shadow .2s;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#0b1020;
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,140,255,.35);}
+  .btn-ghost{border:1.5px solid rgba(255,255,255,.2);color:var(--text);}
+  .btn-ghost:hover{border-color:var(--accent2);color:var(--accent2);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:90px 6% 70px;
+    text-align:center;
+    background:
+      radial-gradient(600px 300px at 20% 0%, rgba(108,140,255,.18), transparent 60%),
+      radial-gradient(600px 300px at 80% 10%, rgba(34,211,238,.14), transparent 60%);
+  }
+  .hero .tag{
+    display:inline-block;padding:6px 16px;border-radius:999px;
+    background:rgba(108,140,255,.12);border:1px solid rgba(108,140,255,.35);
+    color:var(--accent);font-size:.85rem;font-weight:700;letter-spacing:1px;
+    margin-bottom:22px;text-transform:uppercase;
+  }
+  .hero h1{
+    font-size:clamp(2.2rem, 5vw, 3.6rem);
+    font-weight:900;line-height:1.15;max-width:850px;margin:0 auto 18px;
+  }
+  .hero h1 .grad{
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero p{max-width:640px;margin:0 auto 34px;color:var(--muted);font-size:1.1rem;}
+  .hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+  .stats{
+    display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:56px;
+  }
+  .stat{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:var(--radius);
+    padding:18px 30px;min-width:160px;
+  }
+  .stat b{display:block;font-size:1.6rem;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .stat small{color:var(--muted);font-weight:600;}
+
+  /* ---------- SUBJECTS ---------- */
+  .section{padding:70px 6%;}
+  .section-head{text-align:center;margin-bottom:48px;}
+  .section-head h2{font-size:clamp(1.7rem,3.5vw,2.4rem);font-weight:800;margin-bottom:10px;}
+  .section-head p{color:var(--muted);max-width:560px;margin:0 auto;}
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(270px, 1fr));
+    gap:22px;max-width:1200px;margin:0 auto;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:var(--radius);
+    padding:28px 26px;
+    transition:transform .2s, background .2s, border-color .2s;
+    position:relative;overflow:hidden;
+  }
+  .card::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:4px;
+    background:var(--sub-color, var(--accent));
+  }
+  .card:hover{transform:translateY(-6px);background:var(--card-hover);border-color:rgba(255,255,255,.16);}
+  .card .icon{
+    width:52px;height:52px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.5rem;margin-bottom:18px;
+    background:color-mix(in srgb, var(--sub-color) 18%, transparent);
+    border:1px solid color-mix(in srgb, var(--sub-color) 45%, transparent);
+  }
+  .card h3{font-size:1.25rem;font-weight:800;margin-bottom:4px;}
+  .card .sub-tag{font-size:.78rem;font-weight:800;letter-spacing:1.5px;color:var(--sub-color);text-transform:uppercase;}
+  .card p{color:var(--muted);font-size:.93rem;margin:12px 0 16px;}
+  .topics{list-style:none;margin-bottom:20px;}
+  .topics li{
+    font-size:.88rem;color:#c3cae8;padding:5px 0 5px 24px;position:relative;
+  }
+  .topics li::before{
+    content:"›";position:absolute;left:6px;color:var(--sub-color);font-weight:900;
+  }
+  .card .card-link{
+    display:inline-flex;align-items:center;gap:6px;
+    color:var(--sub-color);font-weight:700;font-size:.92rem;text-decoration:none;
+  }
+  .card .card-link:hover{gap:10px;}
+  .card .card-link::after{content:"→";transition:margin .15s;}
+  .phy{--sub-color:var(--phy);}
+  .oc{--sub-color:var(--oc);}
+  .pc{--sub-color:var(--pc);}
+  .ioc{--sub-color:var(--ioc);}
+  .math{--sub-color:var(--math);}
+
+  /* ---------- FEATURES ---------- */
+  .features{background:var(--bg2);}
+  .feat-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:20px;max-width:1100px;margin:0 auto;
+  }
+  .feat{
+    padding:26px;border-radius:var(--radius);
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  }
+  .feat .f-icon{font-size:1.8rem;margin-bottom:12px;}
+  .feat h4{font-size:1.05rem;margin-bottom:6px;font-weight:700;}
+  .feat p{color:var(--muted);font-size:.9rem;}
+
+  /* ---------- CTA ---------- */
+  .cta{
+    text-align:center;padding:80px 6%;
+    background:
+      radial-gradient(500px 250px at 50% 100%, rgba(34,211,238,.12), transparent 70%);
+  }
+  .cta h2{font-size:clamp(1.6rem,3.5vw,2.3rem);font-weight:800;margin-bottom:12px;}
+  .cta p{color:var(--muted);margin-bottom:30px;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid rgba(255,255,255,.07);
+    padding:28px 6%;text-align:center;color:var(--muted);font-size:.88rem;
+  }
+  footer a{color:var(--accent);text-decoration:none;}
+
+  @media (max-width:640px){
+    .nav-links li:not(:last-child){display:none;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-badge">J</div>
+    <span>JEE<em>360</em></span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#subjects">Subjects</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#start">Mock Tests</a></li>
+    <li><a href="#start" class="btn btn-primary">Get Started</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <span class="tag">⚡ JEE Main &amp; Advanced 2026</span>
+  <h1>Crack JEE with a <span class="grad">360° preparation</span> strategy</h1>
+  <p>Structured study material, chapter-wise practice and full-length mock tests for Physics, Chemistry (OC · PC · IOC) and Mathematics — all in one place.</p>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="#subjects">Start Learning</a>
+    <a class="btn btn-ghost" href="#start">Take a Mock Test</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>5</b><small>Subject Tracks</small></div>
+    <div class="stat"><b>90+</b><small>Chapters Covered</small></div>
+    <div class="stat"><b>10k+</b><small>Practice Questions</small></div>
+    <div class="stat"><b>50+</b><small>Mock Tests</small></div>
+  </div>
+</header>
+
+<section class="section" id="subjects">
+  <div class="section-head">
+    <h2>Choose Your Subject</h2>
+    <p>Chemistry is split the way toppers study it — Organic, Physical and Inorganic as separate focused tracks.</p>
+  </div>
+  <div class="grid">
+
+    <div class="card phy">
+      <div class="icon">🧲</div>
+      <span class="sub-tag">Physics</span>
+      <h3>Physics</h3>
+      <p>Concept-first approach with derivations, problem patterns and previous-year analysis.</p>
+      <ul class="topics">
+        <li>Mechanics &amp; Rotation</li>
+        <li>Electrostatics &amp; Current</li>
+        <li>Magnetism &amp; EMI</li>
+        <li>Optics &amp; Modern Physics</li>
+        <li>Thermodynamics &amp; Waves</li>
+      </ul>
+      <a class="card-link" href="#start">Explore Physics</a>
+    </div>
+
+    <div class="card oc">
+      <div class="icon">🧪</div>
+      <span class="sub-tag">OC — Chemistry</span>
+      <h3>Organic Chemistry</h3>
+      <p>Mechanism-driven learning: master GOC once, and every reaction falls in place.</p>
+      <ul class="topics">
+        <li>GOC &amp; Isomerism</li>
+        <li>Hydrocarbons &amp; Halides</li>
+        <li>Alcohols, Ethers &amp; Carbonyls</li>
+        <li>Amines &amp; Biomolecules</li>
+        <li>Name Reactions &amp; Conversions</li>
+      </ul>
+      <a class="card-link" href="#start">Explore OC</a>
+    </div>
+
+    <div class="card pc">
+      <div class="icon">⚗️</div>
+      <span class="sub-tag">PC — Chemistry</span>
+      <h3>Physical Chemistry</h3>
+      <p>Numerical-heavy track with formula sheets, shortcut methods and timed drills.</p>
+      <ul class="topics">
+        <li>Mole Concept &amp; Stoichiometry</li>
+        <li>Thermodynamics &amp; Equilibrium</li>
+        <li>Electrochemistry &amp; Kinetics</li>
+        <li>Solutions &amp; Solid State</li>
+        <li>Atomic Structure</li>
+      </ul>
+      <a class="card-link" href="#start">Explore PC</a>
+    </div>
+
+    <div class="card ioc">
+      <div class="icon">🔬</div>
+      <span class="sub-tag">IOC — Chemistry</span>
+      <h3>Inorganic Chemistry</h3>
+      <p>Smart-memory tools: NCERT-mapped notes, trends, mnemonics and rapid revision.</p>
+      <ul class="topics">
+        <li>Periodic Table &amp; Bonding</li>
+        <li>Coordination Compounds</li>
+        <li>p-Block &amp; d/f-Block</li>
+        <li>Salt Analysis</li>
+        <li>Metallurgy &amp; Environmental</li>
+      </ul>
+      <a class="card-link" href="#start">Explore IOC</a>
+    </div>
+
+    <div class="card math">
+      <div class="icon">📐</div>
+      <span class="sub-tag">Mathematics</span>
+      <h3>Maths</h3>
+      <p>From basics to advanced problem-solving with graded exercise sets and tricks.</p>
+      <ul class="topics">
+        <li>Algebra &amp; Quadratics</li>
+        <li>Coordinate Geometry</li>
+        <li>Calculus (Limits → AOI)</li>
+        <li>Vectors &amp; 3D Geometry</li>
+        <li>Probability &amp; PnC</li>
+      </ul>
+      <a class="card-link" href="#start">Explore Maths</a>
+    </div>
+
+  </div>
+</section>
+
+<section class="section features" id="features">
+  <div class="section-head">
+    <h2>Why JEE360?</h2>
+    <p>Everything you need for a complete preparation cycle — learn, practice, test, revise.</p>
+  </div>
+  <div class="feat-grid">
+    <div class="feat">
+      <div class="f-icon">📚</div>
+      <h4>Chapter-wise Notes</h4>
+      <p>Crisp theory mapped to the latest JEE syllabus with solved examples.</p>
+    </div>
+    <div class="feat">
+      <div class="f-icon">📝</div>
+      <h4>Practice &amp; PYQs</h4>
+      <p>Topic-wise question banks with previous-year questions and solutions.</p>
+    </div>
+    <div class="feat">
+      <div class="f-icon">⏱️</div>
+      <h4>Timed Mock Tests</h4>
+      <p>Full-length tests in the real NTA pattern with instant scoring.</p>
+    </div>
+    <div class="feat">
+      <div class="f-icon">📊</div>
+      <h4>Progress Tracking</h4>
+      <p>Know your weak chapters and fix them with targeted revision.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta" id="start">
+  <h2>Your rank starts with today's revision.</h2>
+  <p>Pick a subject, set a goal, and let JEE360 handle the rest.</p>
+  <a class="btn btn-primary" href="#subjects">Start Preparing Now</a>
+</section>
+
+<footer>
+  <p>© 2026 JEE360 · Built for JEE aspirants · <a href="https://github.com/smartstopwach/jee360">GitHub</a></p>
+</footer>
+
+</body>
+</html>
