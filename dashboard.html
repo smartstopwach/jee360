@@ -93,6 +93,11 @@
   .mini-task .mt-type{font-size:.66rem;font-weight:800;color:#9aa3c7;letter-spacing:1px;min-width:56px;}
   .mini-task .mt-title{flex:1;font-weight:600;}
   .mini-task .mt-time{color:#8a93b5;font-weight:700;white-space:nowrap;}
+  .mini-undo{
+    padding:4px 12px !important;font-size:.78rem !important;border-radius:8px;
+    border:1.5px solid #f3c6d8;color:#e05b8a;background:#fff;font-weight:800;cursor:pointer;
+  }
+  .mini-undo:hover{background:#fdf0f5;border-color:#e05b8a;}
   .mini-task.done-row .mt-title{text-decoration:line-through;color:#b6bdd8;}
   .day-note{color:#8a93b5;font-size:.82rem;margin:4px 0 0 4px;}
   .plan-sub b{color:var(--ink);}
@@ -384,11 +389,13 @@
   }
   function miniRow(t){
     const isDone = done.has(t.id);
+    const wasMoved = moves[t.id] && !isDone;
     return `<div class="mini-task${isDone?' done-row':''}">
-      <span>${isDone?'✅':'⬜'}</span>
+      <span>${isDone?'✅':(wasMoved?'⏭':'⬜')}</span>
       <span class="mt-type">${t.type}</span>
-      <span class="mt-title">${t.title}</span>
+      <span class="mt-title">${t.title}${wasMoved?' <span style="color:#e05b8a;font-size:.72rem;font-weight:800">(MOVED)</span>':''}</span>
       <span class="mt-time">${fmt(effMins(t))}</span>
+      ${wasMoved?'<button class="btn mini-undo" data-undo="'+t.id+'">↩ Wapas</button>':''}
     </div>`;
   }
 
@@ -456,10 +463,11 @@
     const list = document.getElementById('taskList');
     list.innerHTML = html;
 
-    /* moved-to-tomorrow note */
-    const movedTomorrow = Object.keys(moves).filter(id => moves[id] === currentDay+1 && !done.has(id)).length;
-    document.getElementById('movedNote').innerHTML = movedTomorrow
-      ? '⏭ <b>' + movedTomorrow + '</b> task' + (movedTomorrow>1?'s':'') + ' moved to tomorrow (Day ' + (currentDay+1) + ')'
+    /* moved-to-tomorrow note + undo all */
+    const movedIds = Object.keys(moves).filter(id => moves[id] === currentDay+1 && !done.has(id));
+    document.getElementById('movedNote').innerHTML = movedIds.length
+      ? '⏭ <b>' + movedIds.length + '</b> task' + (movedIds.length>1?'s':'') + ' moved to tomorrow (Day ' + (currentDay+1) + ') ' +
+        '<button class="btn mini-undo" id="undoAll">↩ Sab wapas lao</button>'
       : '';
 
     /* sidebar */
@@ -504,6 +512,18 @@
         moves[b.dataset.move] = currentDay + 1;   // "I'll do this next day"
         saveMoves(); render();
       });
+    });
+    /* undo: galti se move hua toh wapas original day pe */
+    list.querySelectorAll('[data-undo]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        delete moves[b.dataset.undo];
+        saveMoves(); render();
+      });
+    });
+    const ua = document.getElementById('undoAll');
+    if(ua) ua.addEventListener('click', ()=>{
+      Object.keys(moves).forEach(id=>{ if(moves[id]===currentDay+1 && !done.has(id)) delete moves[id]; });
+      saveMoves(); render();
     });
   }
 
