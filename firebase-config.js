@@ -1,21 +1,11 @@
 /* ============================================
-   JEE360 — Firebase config
-   Firebase console se apna config yahan paste karo:
-   console.firebase.google.com → Project settings →
-   Your apps → Web app → firebaseConfig
-
-   Jab tak ye null hai, site normal chalegi
-   (data sirf is device pe save hoga).
+   JEE360 — Firebase config (Google login + cloud sync)
    ============================================ */
-window.JEE360_FIREBASE_CONFIG = null;
-
-/* Example (apna wala paste karke null hatao):
 window.JEE360_FIREBASE_CONFIG = {
-  apiKey: "AIza....",
-  authDomain: "jee360-xxxx.firebaseapp.com",
-  projectId: "jee360-xxxx",
-  storageBucket: "jee360-xxxx.appspot.com",
-  messagingSenderId: "1234567890",
-  appId: "1:1234567890:web:abcdef"
+  apiKey: "AIzaSyBNLU_5HQ2LzSHtS5zBlTu5ZYw-yUbj7iM",
+  authDomain: "jee360-0.firebaseapp.com",
+  projectId: "jee360-0",
+  storageBucket: "jee360-0.firebasestorage.app",
+  messagingSenderId: "325058693174",
+  appId: "1:325058693174:web:b4b7b6862c0c34099d7097"
 };
-*/
