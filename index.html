@@ -5,10 +5,15 @@
 <script>
 /* Returning user: plan ban chuka hai toh seedha dashboard —
    front page sirf first-time ke liye.
-   (Front page dekhna ho toh: index.html?home) */
+   Logo se aaye ho (?home) toh front page EK baar dikhega,
+   URL saaf ho jaata hai — reload pe wapas dashboard. */
 try{
-  if(localStorage.getItem('jee360.plan') && location.search.indexOf('home') < 0){
+  var hasPlan = localStorage.getItem('jee360.plan');
+  var isHome = location.search.indexOf('home') >= 0;
+  if(hasPlan && !isHome){
     location.replace('dashboard.html');
+  } else if(isHome && history.replaceState){
+    history.replaceState(null, '', location.pathname);
   }
 }catch(e){}
 </script>
