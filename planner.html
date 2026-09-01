@@ -166,7 +166,7 @@
   <div class="summary">
     <p class="lead">Based on your choices, you'll need approximately <b id="sumHeadline">—</b>.</p>
     <div class="srow"><span class="lbl">Lecture Time <em id="atSpeed">at 1.25x</em></span><span id="sumLec">—</span></div>
-    <div class="srow"><span class="lbl">DPP / Practice</span><span id="sumPrac">—</span></div>
+    <div class="srow"><span class="lbl">DPPs <em>har lecture ke baad · Lec 01 chhod ke</em></span><span id="sumPrac">—</span></div>
     <div class="srow total"><span>Total</span><span id="sumTotal">—</span></div>
   </div>
 
@@ -196,17 +196,18 @@
   let chSel = {};
   try{ chSel = JSON.parse(localStorage.getItem('jee360.chapters')||'{}'); }catch(e){}
   const chapLecMins = ch => ch.lectures ? ch.lectures.reduce((a,l)=>a+l.d,0) : ch.v*120;
-  let totLecMins = 0, selV = 0, allV = 0, pracH = 0;
+  let totLecMins = 0, selV = 0, allV = 0, totDpp = 0;
   keys.forEach(k=>{
     const S = SUBJECTS[k];
     S.chapters.forEach(ch=>{
       allV += ch.v;
       const on = !Array.isArray(chSel[k]) || chSel[k].includes(ch.no);
-      if(on){ totLecMins += chapLecMins(ch); selV += ch.v; }
+      if(on){
+        totLecMins += chapLecMins(ch); selV += ch.v;
+        totDpp += Math.max(0, ch.v - 1);   // DPP har lecture ke baad, Lec 01 chhod ke
+      }
     });
-    pracH += S.prac;
   });
-  const totPrac = pracH * (allV ? selV/allV : 1);   // DPP hours proportional to selection
 
   // chips
   document.getElementById('chips').innerHTML =
@@ -221,7 +222,7 @@
     return h + 'h ' + (m<10?'0':'') + m + 'm';
   }
   function dailyMins(days){
-    return (totLecMins/speed + totPrac*60) / days;
+    return (totLecMins/speed) / days;   // DPP ka time count nahi hota
   }
 
   const paceList = document.getElementById('paceList');
@@ -248,12 +249,12 @@
 
   function renderSummary(){
     const lecM  = totLecMins/speed/chosenDays;
-    const pracM = totPrac*60/chosenDays;
+    const dppDay = Math.round(totDpp/chosenDays*10)/10;
     document.getElementById('atSpeed').textContent  = 'at ' + speed + 'x';
     document.getElementById('sumLec').textContent   = fmt(lecM);
-    document.getElementById('sumPrac').textContent  = fmt(pracM);
-    document.getElementById('sumTotal').textContent = fmt(lecM+pracM) + '/day';
-    document.getElementById('sumHeadline').textContent = fmt(lecM+pracM) + '/day';
+    document.getElementById('sumPrac').textContent  = totDpp + ' DPPs · ~' + dppDay + '/din';
+    document.getElementById('sumTotal').textContent = fmt(lecM) + '/day';
+    document.getElementById('sumHeadline').textContent = fmt(lecM) + '/day';
   }
 
   document.querySelectorAll('.speed-btn').forEach(b=>{

@@ -116,6 +116,25 @@
     border:1.5px solid #c9d4fb;color:var(--accent-dark);background:#fff;font-weight:800;cursor:pointer;
   }
   .mini-pull:hover{background:#f2f4ff;border-color:var(--accent-dark);}
+  /* DPP row: lecture ke niche, alag colour (amber tint) */
+  .dpp-row{
+    display:flex;align-items:center;gap:8px;
+    margin:2px 0 8px 26px;padding:7px 12px;
+    background:#fdf6e7;border:1px solid #f0dfb4;border-left:4px solid #e8a03c;
+    border-radius:9px;font-size:.82rem;color:#7a5c1e;
+  }
+  .dpp-row .dpp-tag{
+    font-size:.62rem;font-weight:800;letter-spacing:.06em;color:#fff;
+    background:#e8a03c;border-radius:5px;padding:2px 6px;
+  }
+  .dpp-row .dpp-name{flex:1;font-weight:600;}
+  .dpp-row.dpp-done{opacity:.55;}
+  .dpp-row.dpp-done .dpp-name{text-decoration:line-through;}
+  .dpp-btn{
+    font-size:.72rem;padding:4px 10px;border:1.5px solid #e8a03c;
+    color:#b57816;background:#fff;border-radius:8px;font-weight:700;
+  }
+  .dpp-btn:hover{background:#fdf0d8;}
   .mini-task.done-row .mt-title{text-decoration:line-through;color:#b6bdd8;}
   .day-note{color:#8a93b5;font-size:.82rem;margin:4px 0 0 4px;}
   .plan-sub b{color:var(--ink);}
@@ -258,12 +277,12 @@
           : String(lecNo).padStart(2,'0') + ' : ' + ch.name + (ch.v>1 ? ' (Lecture ' + String(i).padStart(2,'0') + ')' : '');
         tasks.push({ id:key+'-L'+lecNo, subj:key, type:'LECTURE', mins:lecMins, scaled:true,
           title:title,
-          chap:chLabel });
+          chap:chLabel,
+          /* DPP: har lecture ke baad, sirf Lec 01 chhod ke. Time count nahi hota. */
+          dpp: i>=2 ? { id:key+'-D'+lecNo, title:'DPP ' + String(i-1).padStart(2,'0') + ' · ' + ch.name } : null });
       }
-      /* NOTE: DPPs are NOT scheduled as daily tasks —
-         DPP ka alag scene hai (aayega baad mein).
-         Data data.js mein saved hai (ch.e counts), bas
-         daily path mein sirf LECTURES ginte hain. */
+      /* DPPs ab har lecture ke saath attach hain (upar dpp field) —
+         time count nahi hota, sirf checklist. */
     });
     return tasks;
   }
@@ -470,6 +489,19 @@
       ${isDone?'<button class="btn mini-undo" data-undone="'+t.id+'">↩ Un-done</button>':''}
     </div>`;
   }
+  /* DPP row: lecture ke thik niche, alag colour. Time count nahi hota. */
+  function dppRow(t){
+    if(!t.dpp) return '';
+    const d = done.has(t.dpp.id);
+    return `<div class="dpp-row${d?' dpp-done':''}">
+      <span>${d?'✅':'📝'}</span>
+      <span class="dpp-tag">DPP</span>
+      <span class="dpp-name">${t.dpp.title}</span>
+      ${d
+        ? '<button class="btn mini-undo" data-undone="'+t.dpp.id+'">↩ Un-done</button>'
+        : '<button class="btn dpp-btn" data-done="'+t.dpp.id+'">✓ Done</button>'}
+    </div>`;
+  }
 
   function render(){
     repack();   // har render pe future auto-shift
@@ -494,9 +526,12 @@
     const tpTot  = todaySched.reduce((s,t)=>s+effMins(t),0);
     const tpDone = todayDone.reduce((s,t)=>s+effMins(t),0);
     const tpPct  = tpTot ? Math.round(tpDone/tpTot*100) : 0;
+    const tpDppAll = todaySched.filter(t=>t.dpp);
+    const tpDppDone = tpDppAll.filter(t=>done.has(t.dpp.id));
+    const dppStr = tpDppAll.length ? ' · 📝 DPP <b>'+tpDppDone.length+'/'+tpDppAll.length+'</b>' : '';
     document.getElementById('todayProgress').innerHTML = `
       <div class="tp-line">
-        <span>Aaj: <b>${todayDone.length}/${todaySched.length}</b> lectures done · <b>${fmt(tpDone)}</b> / ${fmt(tpTot)}</span>
+        <span>Aaj: <b>${todayDone.length}/${todaySched.length}</b> lectures done · <b>${fmt(tpDone)}</b> / ${fmt(tpTot)}${dppStr}</span>
         <span class="tp-pct">${tpPct}%</span>
       </div>
       <div class="tp-bar"><i style="width:${tpPct}%"></i></div>`;
@@ -518,8 +553,14 @@
       if(isToday){
         headTime = leftMins;
         rows = todayPending.length
-          ? todayPending.map(fullCard).join('')
+          ? todayPending.map(t=>fullCard(t)+dppRow(t)).join('')
           : '<div class="all-done">🎉 All done for today! Day ' + d + ' complete — kal milte hain.</div>';
+        /* pending DPPs jinke lecture ho chuke hain — lecture done, DPP baaki */
+        const orphanDpps = allTasks.filter(t=>t.dpp && done.has(t.id) && !done.has(t.dpp.id));
+        if(orphanDpps.length){
+          rows += '<p class="day-note" style="margin:14px 0 8px">📝 DPP baaki (lecture ho chuka):</p>' +
+                  orphanDpps.map(dppRow).join('');
+        }
         /* recently completed — galti se Done? yahin se un-done */
         const recent = [...done].slice(-5).reverse().map(id=>taskById[id]).filter(Boolean);
         if(recent.length){
@@ -532,14 +573,14 @@
         const doneD = tasksD.filter(t=>done.has(t.id));
         const pendD = tasksD.length - doneD.length;
         headTime = doneD.reduce((s,t)=>s+effMins(t),0);
-        rows = doneD.map(miniRow).join('');
+        rows = doneD.map(t=>miniRow(t)+dppRow(t)).join('');
         if(pendD) note = '<p class="day-note">🔴 ' + pendD + ' task' + (pendD>1?'s':'') + ' pending → aaj ke backlog mein</p>';
         if(!tasksD.length) rows = '<p class="day-note">—</p>';
       }
       else {
         const tasksD = (byDay[d] || []).filter(t=>!done.has(t.id));
         headTime = tasksD.reduce((s,t)=>s+effMins(t),0);
-        rows = tasksD.length ? tasksD.map(miniRow).join('') : '<p class="day-note">Koi task nahi — buffer day 😌</p>';
+        rows = tasksD.length ? tasksD.map(t=>miniRow(t)+dppRow(t)).join('') : '<p class="day-note">Koi task nahi — buffer day 😌</p>';
       }
 
       html += `
