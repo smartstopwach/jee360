@@ -69,26 +69,39 @@
     if(d){ d.style.background = color; d.title = title || ''; }
   }
 
+  let dirty = false;
+  function doPush(){
+    if(!user) return;
+    dirty = false;
+    db.collection('users').doc(user.uid).set({
+      data: localData(),
+      ts: localTs(),
+      updated: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => setDot('#34A853', 'Synced — data Google pe safe hai'))
+      .catch(e => { dirty = true; console.warn('[sync] push fail', e); setDot('#EA4335', 'Sync fail — internet check karo'); });
+  }
   function pushCloud(){
-    if(!user || !ready) return;
+    if(!user || !ready){ dirty = true; return; }
+    dirty = true;
     clearTimeout(pushTimer);
     setDot('#f5a623', 'Saving…');
-    pushTimer = setTimeout(() => {
-      db.collection('users').doc(user.uid).set({
-        data: localData(),
-        updated: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => setDot('#34A853', 'Synced — data Google pe safe hai'))
-        .catch(e => { console.warn('[sync] push fail', e); setDot('#EA4335', 'Sync fail — internet check karo'); });
-    }, 800);
+    pushTimer = setTimeout(doPush, 250);
   }
+  /* page band/chhodne se pehle pending save turant bhejo */
+  window.addEventListener('pagehide', () => { if(dirty && user && ready){ clearTimeout(pushTimer); doPush(); } });
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'hidden' && dirty && user && ready){ clearTimeout(pushTimer); doPush(); }
+  });
 
+  function stamp(){ origSet('jee360.ts', String(Date.now())); }
+  const localTs = () => +(localStorage.getItem('jee360.ts') || 0);
   localStorage.setItem = function(k, v){
     origSet(k, v);
-    if(String(k).indexOf('jee360.') === 0) pushCloud();
+    if(String(k).indexOf('jee360.') === 0 && k !== 'jee360.ts'){ stamp(); pushCloud(); }
   };
   localStorage.removeItem = function(k){
     origDel(k);
-    if(String(k).indexOf('jee360.') === 0) pushCloud();
+    if(String(k).indexOf('jee360.') === 0 && k !== 'jee360.ts'){ stamp(); pushCloud(); }
   };
 
   function applyCloud(data){
@@ -150,37 +163,41 @@
        yahan turant apply hota hai (bina refresh ke) */
     unsub = db.collection('users').doc(u.uid).onSnapshot(snap => {
       if(snap.metadata.hasPendingWrites) return;   // apna hi write, ignore
-      const cloud = snap.exists && snap.data() && snap.data().data;
-      if(firstSnap){
-        firstSnap = false;
-        if(cloud && Object.keys(cloud).length){
-          const changed = applyCloud(cloud);
-          ready = true;
-          if(changed){
-            /* cloud ka data laga — dashboard live re-render, baaki pages reload */
-            if(document.getElementById('taskList')){
-              window.dispatchEvent(new Event('jee360:cloudchange'));
-            } else if(!sessionStorage.getItem('jee360.justSynced')){
-              sessionStorage.setItem('jee360.justSynced', '1');
-              location.reload();
-              return;
-            }
-          }
-          sessionStorage.removeItem('jee360.justSynced');
-        } else {
-          ready = true;
-          pushCloud();   // cloud khali — pehli baar: local data upar
-        }
+      const d = snap.exists ? snap.data() : null;
+      const cloud = d && d.data;
+      const cloudTs = (d && d.ts) || 0;
+      const wasFirst = firstSnap; firstSnap = false;
+
+      /* cloud khali — local data upar bhejo */
+      if(!cloud || !Object.keys(cloud).length){
+        ready = true;
+        if(Object.keys(localData()).length) pushCloud();
         return;
       }
-      /* live update from another device */
-      if(cloud && Object.keys(cloud).length){
-        const changed = applyCloud(cloud);
-        if(changed){
-          setDot('#34A853', 'Doosre device se update aaya');
+      /* LOCAL NAYA hai (save ke turant baad navigate hua tha, push
+         miss ho gaya) — cloud ko update karo, local ko haath mat lagao */
+      if(localTs() > cloudTs){
+        ready = true;
+        pushCloud();
+        return;
+      }
+      /* cloud naya (ya barabar/first) — local pe utaro */
+      const changed = applyCloud(cloud);
+      if(cloudTs) origSet('jee360.ts', String(cloudTs));
+      ready = true;
+      if(changed){
+        if(document.getElementById('taskList')){
+          if(!wasFirst) setDot('#34A853', 'Doosre device se update aaya');
+          window.dispatchEvent(new Event('jee360:cloudchange'));
+        } else if(wasFirst && !sessionStorage.getItem('jee360.justSynced')){
+          sessionStorage.setItem('jee360.justSynced', '1');
+          location.reload();
+          return;
+        } else if(!wasFirst){
           window.dispatchEvent(new Event('jee360:cloudchange'));
         }
       }
+      if(wasFirst) sessionStorage.removeItem('jee360.justSynced');
     }, e => {
       console.warn('[sync] listener fail', e);
       ready = true;
