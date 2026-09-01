@@ -473,7 +473,8 @@
     const isDone = done.has(t.id);
     const wasMoved = moves[t.id] && !isDone;
     const canPull = !isDone && !wasMoved && dayOf(t) > currentDay;
-    const isUpped = !isDone && dayOf(t) < baseDayOf[t.id];
+    /* UPPED sirf explicit pull pe — auto-repack se khiske lectures normal hi hain */
+    const isUpped = !isDone && moves[t.id] && dayOf(t) < baseDayOf[t.id];
     const isReplaced = !isDone && !isUpped && replaced.has(t.id);
     let tag = '';
     if(wasMoved) tag = ' <span style="color:#e05b8a;font-size:.72rem;font-weight:800">(MOVED)</span>';
