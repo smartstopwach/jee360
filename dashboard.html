@@ -267,37 +267,52 @@
       }
     }
   } else {
-    /* Weekly: 2 chapter-slots — chapter continue, khatam pe rotate */
-    const order = subjects.slice();
-    let ptr = 0;
-    const nextSub = (exclude)=>{
-      for(let i=0;i<order.length;i++){
-        const k = order[(ptr+i)%order.length];
-        if(queues[k].length && k!==exclude){ ptr = (ptr+i+1)%order.length; return k; }
+    /* Weekly: 2 chapter-slots — chapter continue, khatam pe SMART pick.
+       SMART RULE: agla chapter us subject ka aata hai jo apne target
+       pace se sabse zyada peeche hai (weighted balancing) —
+       bade subjects (phy/math) zyada baar, chhote spread-out.
+       Chemistry ki 2 branches ek saath avoid hoti hain. */
+    const sizeOf = {}; subjects.forEach(k=> sizeOf[k] = bySubject[k].reduce((a,t)=>a+effMins(t),0));
+    const totalSize = subjects.reduce((s,k)=>s+sizeOf[k],0) || 1;
+    const schedMins = {}; subjects.forEach(k=> schedMins[k]=0);
+    let totalSched = 0;
+    const CHEM = { oc:1, pc:1, ioc:1 };
+
+    const pickNext = (exclude)=>{
+      const cands = subjects.filter(k=>queues[k].length && k!==exclude);
+      if(!cands.length) return subjects.find(k=>queues[k].length) || null;
+      const deficit = k => (totalSched + 60) * (sizeOf[k]/totalSize) - schedMins[k];
+      cands.sort((a,b)=>deficit(b)-deficit(a));
+      let pick = cands[0];
+      /* dono slots chemistry na ho jayein — thoda balance */
+      if(exclude && CHEM[exclude] && CHEM[pick]){
+        const alt = cands.find(k=>!CHEM[k]);
+        if(alt && deficit(alt) >= 0.7*deficit(pick)) pick = alt;
       }
-      for(const k of order) if(queues[k].length) return k;   // fallback
-      return null;
+      return pick;
     };
+
     const slots = [];
-    slots[0] = nextSub(null);
-    slots[1] = nextSub(slots[0]);
+    slots[0] = pickNext(null);
+    slots[1] = pickNext(slots[0]);
 
     for(let day=1; day<=days; day++){
-      const active = slots.filter(k=>k && queues[k].length);
-      if(!active.length && !subjects.some(k=>queues[k].length)) break;
+      const anyLeft = subjects.some(k=>queues[k].length);
+      if(!anyLeft) break;
       const target = quota / Math.max(1, slots.filter(Boolean).length);
       for(let si=0; si<slots.length; si++){
         let acc = 0;
         while(acc < target){
           let k = slots[si];
           const other = slots[1-si];
-          if(!k || !queues[k].length){ slots[si] = nextSub(other); k = slots[si]; }
+          if(!k || !queues[k].length){ slots[si] = pickNext(other); k = slots[si]; }
           if(!k || !queues[k].length) break;
           const t = queues[k].shift();
-          baseDayOf[t.id] = day; allTasks.push(t); acc += effMins(t);
-          /* chapter KHATAM? tabhi slot agle subject pe ghoomta hai */
+          baseDayOf[t.id] = day; allTasks.push(t);
+          acc += effMins(t); schedMins[k] += effMins(t); totalSched += effMins(t);
+          /* chapter KHATAM? tabhi slot smartly agla subject uthata hai */
           if(!queues[k].length || queues[k][0].chap !== t.chap){
-            slots[si] = nextSub(other);
+            slots[si] = pickNext(other);
           }
         }
       }
