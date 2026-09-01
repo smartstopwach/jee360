@@ -243,6 +243,9 @@
     <div class="side-card">
       <h4>Your subjects</h4>
       <div id="subjList"></div>
+      <a href="chapters.html" style="display:block;text-align:center;margin-top:12px;padding:9px 12px;
+         border:1.5px dashed #b9c3e8;border-radius:10px;color:#4f5d9e;font-weight:700;font-size:.82rem;
+         text-decoration:none">📚 Chapters badlo <small style="font-weight:600;color:#8a93b8">(planner khud adjust hoga)</small></a>
     </div>
   </aside>
 </div>
@@ -403,6 +406,27 @@
   const currentDay = Math.max(1, Math.min(days,
     Math.floor((Date.now() - startDate.getTime()) / 86400000) + 1));
 
+  /* -------- REPLAN (chapters badle gaye) --------
+     Plan chalu hone ke baad user ne chapters add/remove kiye →
+     bacha hua saara kaam AAJ se bache dinon me fresh pack hota hai.
+     Result rebase map me save — plan phir se stable rehta hai. */
+  let rebase = {};
+  try{ rebase = JSON.parse(localStorage.getItem('jee360.rebase')||'{}'); }catch(e){}
+  const bDay = id => (rebase[id] !== undefined ? rebase[id] : baseDayOf[id]);
+  if(localStorage.getItem('jee360.replan') === '1'){
+    rebase = {};
+    const pool = allTasks.filter(t => !done.has(t.id) && !(t.id in moves));
+    let rem = pool.reduce((s,t)=>s+effMins(t),0);
+    let d = currentDay, remD = days - currentDay + 1, acc = 0, target = rem/Math.max(1,remD);
+    for(const t of pool){
+      rebase[t.id] = Math.min(d, days);
+      acc += effMins(t); rem -= effMins(t);
+      if(acc >= target && d < days){ d++; remD--; acc = 0; target = rem/Math.max(1,remD); }
+    }
+    localStorage.setItem('jee360.rebase', JSON.stringify(rebase));
+    localStorage.removeItem('jee360.replan');
+  }
+
   /* -------- AUTO-REBALANCE --------
      Aage ke din har baar re-pack hote hain: jo ho chuka / aaj khich
      liya, uske hisaab se baaki lectures EK-EK UPAR shift ho jaate
@@ -417,10 +441,10 @@
        "Next day" move = us din normal load + 1, backlog = agle din +1.
        Koi automatic redistribution nahi. */
     const workedAhead = allTasks.some(t =>
-      baseDayOf[t.id] > currentDay && (done.has(t.id) || moves[t.id] <= currentDay));
+      bDay(t.id) > currentDay && (done.has(t.id) || moves[t.id] <= currentDay));
     if(!workedAhead) return;
     const packable = allTasks.filter(t =>
-      !done.has(t.id) && !(t.id in moves) && baseDayOf[t.id] > currentDay);
+      !done.has(t.id) && !(t.id in moves) && bDay(t.id) > currentDay);
     let rem = packable.reduce((s,t)=>s+effMins(t),0);
     let d = currentDay+1, remD = futureDaysCnt, acc = 0, target = rem/Math.max(1,remD);
     for(const t of packable){
@@ -433,7 +457,7 @@
   const dayOf = t => {
     if(moves[t.id]) return moves[t.id];                       // user ka explicit move/pull
     if(!done.has(t.id) && packedDay[t.id]) return packedDay[t.id];  // auto-shifted
-    return baseDayOf[t.id];
+    return bDay(t.id);
   };
 
   const taskById = {}; allTasks.forEach(t=>taskById[t.id]=t);
@@ -456,7 +480,7 @@
     const s = CURRICULUM[t.subj];
     const bd = dayOf(t);
     const backlog = bd < currentDay ? ' · <span style="color:#e05b8a;font-weight:800">BACKLOG · DAY ' + bd + '</span>' : '';
-    const upped = baseDayOf[t.id] > currentDay ? ' · <span style="color:#2eaa6e;font-weight:800">⏫ UPPED · Day ' + baseDayOf[t.id] + ' se</span>' : '';
+    const upped = bDay(t.id) > currentDay ? ' · <span style="color:#2eaa6e;font-weight:800">⏫ UPPED · Day ' + bDay(t.id) + ' se</span>' : '';
     const timeStr = t.scaled
       ? '🕐 <b>'+fmt(t.mins/speed)+'</b> <small>· '+fmt(t.mins)+' at 1x</small>'
       : '🕐 <b>'+fmt(t.mins)+'</b>';
@@ -482,11 +506,11 @@
     const wasMoved = moves[t.id] && !isDone;
     const canPull = !isDone && !wasMoved && dayOf(t) > currentDay;
     /* UPPED sirf explicit pull pe — auto-repack se khiske lectures normal hi hain */
-    const isUpped = !isDone && moves[t.id] && dayOf(t) < baseDayOf[t.id];
+    const isUpped = !isDone && moves[t.id] && dayOf(t) < bDay(t.id);
     const isReplaced = !isDone && !isUpped && replaced.has(t.id);
     let tag = '';
     if(wasMoved) tag = ' <span style="color:#e05b8a;font-size:.72rem;font-weight:800">(MOVED)</span>';
-    else if(isUpped) tag = ' <span style="color:#2eaa6e;font-size:.72rem;font-weight:800">(⏫ UPPED · Day '+baseDayOf[t.id]+' se)</span>';
+    else if(isUpped) tag = ' <span style="color:#2eaa6e;font-size:.72rem;font-weight:800">(⏫ UPPED · Day '+bDay(t.id)+' se)</span>';
     else if(isReplaced) tag = ' <span style="color:#e8a03c;font-size:.72rem;font-weight:800">(🔁 REPLACED)</span>';
     return `<div class="mini-task${isDone?' done-row':''}">
       <span>${isDone?'✅':(wasMoved?'⏭':(isUpped?'⏫':'⬜'))}</span>
@@ -652,7 +676,7 @@
     list.querySelectorAll('[data-move]').forEach(b=>{
       b.addEventListener('click', ()=>{
         const id = b.dataset.move;
-        if(baseDayOf[id] > currentDay){
+        if(bDay(id) > currentDay){
           /* ye lecture upar aaya tha — wapas niche bhejo apni jagah pe (REPLACED) */
           delete moves[id];
           replaced.add(id); saveReplaced();
@@ -705,6 +729,7 @@
     try{ done = new Set(JSON.parse(localStorage.getItem('jee360.done')||'[]')); }catch(e){}
     try{ moves = JSON.parse(localStorage.getItem('jee360.moves')||'{}'); }catch(e){}
     try{ replaced = new Set(JSON.parse(localStorage.getItem('jee360.replaced')||'[]')); }catch(e){}
+    try{ rebase = JSON.parse(localStorage.getItem('jee360.rebase')||'{}'); }catch(e){}
     render();
   });
 

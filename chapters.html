@@ -174,9 +174,23 @@
     document.getElementById('goBtn').disabled = lecs===0;
   }
 
+  /* edit mode: plan bana hua hai */
+  if(localStorage.getItem('jee360.plan')){
+    const gb=document.getElementById('goBtn');
+    if(gb) gb.textContent='✓ Save karo — planner khud adjust hoga';
+    const bk=document.querySelector('.back');
+    if(bk){ bk.href='dashboard.html'; bk.textContent='‹ Dashboard'; }
+  }
   document.getElementById('goBtn').addEventListener('click', ()=>{
     localStorage.setItem('jee360.chapters', JSON.stringify(sel));
-    window.location.href = 'planner.html';
+    /* plan pehle se chal raha hai? → replan flag: dashboard aaj se
+       bacha hua kaam khud re-adjust karega */
+    if(localStorage.getItem('jee360.plan')){
+      localStorage.setItem('jee360.replan', '1');
+      window.location.href = 'dashboard.html';
+    } else {
+      window.location.href = 'planner.html';
+    }
   });
 
   renderBlocks(); updateMeta();

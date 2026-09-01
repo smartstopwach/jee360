@@ -8,7 +8,7 @@
 (function(){
   const KEYS = [
     'jee360.subjects', 'jee360.chapters', 'jee360.plan',
-    'jee360.done', 'jee360.moves', 'jee360.replaced'
+    'jee360.done', 'jee360.moves', 'jee360.replaced', 'jee360.rebase'
   ];
 
   const G_LOGO =
