@@ -155,12 +155,12 @@
   <button class="start-btn" id="startBtn">Start my planner</button>
 </div>
 
+<script src="data.js"></script>
 <script>
 (function(){
-  const SUBJECTS = {
-    phy:'Physics', oc:'Organic Chemistry', pc:'Physical Chemistry',
-    ioc:'Inorganic Chemistry', math:'Mathematics'
-  };
+  const D = window.JEE360_DATA.subjects;
+  const SUBJECTS = {};
+  Object.keys(D).forEach(k => SUBJECTS[k] = D[k].name);
 
   // read saved plan (subjects + days + speed)
   let plan = {};

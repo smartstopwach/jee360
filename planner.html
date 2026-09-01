@@ -176,16 +176,11 @@
   </div>
 </div>
 
+<script src="data.js"></script>
 <script>
 (function(){
-  // subject data: lecture & practice hours
-  const SUBJECTS = {
-    phy:  { name:'Physics',             lec:220, prac:110 },
-    oc:   { name:'Organic Chemistry',   lec:95,  prac:50  },
-    pc:   { name:'Physical Chemistry',  lec:85,  prac:45  },
-    ioc:  { name:'Inorganic Chemistry', lec:70,  prac:35  },
-    math: { name:'Mathematics',         lec:240, prac:120 }
-  };
+  // subject data from master data file (data.js)
+  const SUBJECTS = window.JEE360_DATA.subjects;
 
   const PACES = [
     { days:120, name:'Balanced Pace', desc:'A more manageable daily workload with consistent progress.', tag:'Recommended', cls:'comfortable' },

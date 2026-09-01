@@ -148,30 +148,11 @@
   </aside>
 </div>
 
+<script src="data.js"></script>
 <script>
 (function(){
-  /* ---------------- CURRICULUM ---------------- */
-  const CURRICULUM = {
-    phy:{ name:'Physics', teacher:'Rajat Singh Sir', chapters:[
-      ['Units, Dimensions and Measurement',4],['Vectors & Kinematics',6],['Laws of Motion',5],
-      ['Work, Power & Energy',4],['Rotational Motion',6],['Gravitation',3],
-      ['Thermal Physics',5],['SHM & Waves',5],['Electrostatics',6],
-      ['Current Electricity',5],['Magnetism & EMI',6],['Optics',5],['Modern Physics',5]]},
-    oc:{ name:'Organic Chemistry', teacher:'Ankit Verma Sir', chapters:[
-      ['GOC - 1 & 2',6],['Isomerism',4],['Hydrocarbons',5],['Haloalkanes & Haloarenes',4],
-      ['Alcohols, Phenols & Ethers',4],['Aldehydes, Ketones & Acids',5],['Amines & Biomolecules',4]]},
-    pc:{ name:'Physical Chemistry', teacher:'S. Mishra Sir', chapters:[
-      ['Mole Concept',5],['Atomic Structure',4],['Thermodynamics & Thermochemistry',5],
-      ['Chemical & Ionic Equilibrium',5],['Electrochemistry',4],['Chemical Kinetics',4],['Solutions & Solid State',4]]},
-    ioc:{ name:'Inorganic Chemistry', teacher:'P. Dubey Sir', chapters:[
-      ['Periodic Table & Properties',4],['Chemical Bonding',6],['p-Block Elements',5],
-      ['d & f Block',3],['Coordination Compounds',5],['Salt Analysis',3]]},
-    math:{ name:'Mathematics', teacher:'V. Tiwari Sir', chapters:[
-      ['Basic Maths & Quadratics',5],['Sequence & Series',4],['Trigonometry',5],
-      ['Straight Lines & Circles',6],['Conic Sections',5],['Permutations & Probability',5],
-      ['Matrices & Determinants',4],['Limits, Continuity & Differentiability',6],
-      ['Application of Derivatives',4],['Integration & AOI',6],['Vectors & 3D',5]]}
-  };
+  /* ---------------- CURRICULUM (from data.js master file) ---------------- */
+  const CURRICULUM = window.JEE360_DATA.subjects;
 
   /* ---------------- PLAN ---------------- */
   let plan = {};
