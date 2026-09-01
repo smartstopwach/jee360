@@ -209,12 +209,7 @@
   document.getElementById('startBtn').addEventListener('click', ()=>{
     plan = { subjects, days, speed, mode };
     localStorage.setItem('jee360.plan', JSON.stringify(plan));
-    const end = new Date(Date.now() + days*86400000);
-    document.getElementById('doneNote').textContent =
-      '✅ Planner ready! ' + (mode==='weekly'?'Weekly Timetable':'One Subject at a Time') +
-      ' · ' + days + ' days · finish by ' +
-      end.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) +
-      '. (Day-by-day schedule page coming next!)';
+    window.location.href = 'dashboard.html';
   });
 
   renderPreview();

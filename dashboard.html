@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JEE360 — Today's Study Plan</title>
+<style>
+  :root{
+    --bg:#f7f8fc;
+    --card:#ffffff;
+    --ink:#1c2340;
+    --muted:#8a93b5;
+    --accent:#7b8cf5;
+    --accent-dark:#5b6ee8;
+    --border:#e6e9f4;
+    --teal:#2dd4bf;
+    --green:#22c55e;
+    --mint-bg:#e9fbf5;
+    --radius:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.5;
+  }
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 4%;
+    background:#fff;border-bottom:1px solid var(--border);
+    position:sticky;top:0;z-index:20;
+  }
+  .brand{font-size:1.05rem;color:var(--ink);text-decoration:none;}
+  .brand b{font-weight:800;}
+  .brand span{color:var(--accent-dark);font-weight:600;margin-left:6px;}
+  .avatar{
+    width:34px;height:34px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),#22d3ee);
+    color:#fff;font-weight:800;font-size:.85rem;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .layout{
+    max-width:1150px;margin:0 auto;
+    display:grid;grid-template-columns:1fr 300px;gap:28px;
+    padding:26px 20px 80px;
+  }
+  @media (max-width:900px){.layout{grid-template-columns:1fr;}}
+
+  .overall{color:var(--muted);font-size:.85rem;font-weight:600;margin-bottom:14px;}
+
+  .plan-head{display:flex;justify-content:space-between;align-items:center;}
+  .plan-head h2{
+    font-size:.85rem;letter-spacing:1.5px;color:#5a6284;font-weight:800;
+  }
+  .plan-head .total-time{color:#5a6284;font-weight:700;font-size:.95rem;}
+  .plan-sub{color:var(--muted);font-size:.85rem;margin:6px 0 18px;}
+  .plan-sub b{color:var(--ink);}
+
+  /* ---------- TASK CARD ---------- */
+  .task{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-left:4px solid var(--teal);
+    border-radius:var(--radius);
+    padding:18px 22px;
+    margin-bottom:16px;
+  }
+  .task.done-task{opacity:.55;}
+  .task .t-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .task .subj{font-size:.75rem;font-weight:800;letter-spacing:1px;color:var(--accent-dark);text-transform:uppercase;}
+  .task .teacher{color:#b6bdd8;font-size:.8rem;font-weight:600;margin-left:8px;}
+  .task .type{font-size:.7rem;font-weight:800;letter-spacing:1.5px;color:#9aa3c7;}
+  .task h3{font-size:1.05rem;font-weight:800;margin:2px 0 4px;}
+  .task .chap{color:var(--muted);font-size:.87rem;}
+  .task .t-bottom{
+    display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:10px;
+  }
+  .task .time{font-size:.9rem;color:#4a536e;font-weight:700;}
+  .task .time small{color:#b6bdd8;font-weight:600;}
+  .task .actions{display:flex;gap:10px;}
+  .btn{
+    padding:8px 18px;border-radius:10px;font-weight:700;font-size:.88rem;
+    cursor:pointer;border:1.5px solid var(--border);background:#fff;color:#5a6284;
+    transition:all .15s;
+  }
+  .btn:hover{border-color:var(--accent);color:var(--accent-dark);}
+  .btn.done-btn{
+    background:var(--accent);border-color:var(--accent);color:#fff;
+  }
+  .btn.done-btn:hover{background:var(--accent-dark);}
+  .all-done{
+    background:var(--mint-bg);border:1px solid #bceede;border-radius:var(--radius);
+    padding:26px;text-align:center;font-weight:700;color:#0f9d77;
+  }
+
+  /* ---------- SIDEBAR ---------- */
+  .side-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px 22px;margin-bottom:20px;
+  }
+  .side-card.health{background:var(--mint-bg);border-color:#d1f2e5;}
+  .side-card h4{font-size:.92rem;font-weight:700;color:#5a6284;margin-bottom:10px;}
+  .health-status{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1rem;margin-bottom:6px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--green);}
+  .dot.warn{background:#f59e0b;}
+  .health-desc{color:#5a6284;font-size:.87rem;}
+  .health-desc b{color:var(--ink);}
+  .subj-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:9px 0;border-top:1px dashed var(--border);font-size:.92rem;
+  }
+  .subj-row:first-of-type{border-top:none;}
+  .subj-row .nm{font-weight:700;}
+  .subj-row .tch{display:block;color:#b6bdd8;font-size:.76rem;font-weight:600;}
+  .subj-row .pct{color:var(--muted);font-weight:700;font-size:.85rem;}
+  .bar{height:5px;border-radius:99px;background:#edf0fa;margin:4px 0 2px;overflow:hidden;}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#22d3ee);border-radius:99px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="index.html"><b>JEE360</b><span>Study Planner</span></a>
+  <div class="avatar">J</div>
+</div>
+
+<div class="layout">
+  <main>
+    <p class="overall" id="overall">0 of 0 done</p>
+    <div class="plan-head">
+      <h2>TODAY'S STUDY PLAN</h2>
+      <span class="total-time" id="todayTotal">🕐 —</span>
+    </div>
+    <p class="plan-sub" id="planSub"></p>
+    <div id="taskList"></div>
+  </main>
+
+  <aside>
+    <div class="side-card health">
+      <h4>Your plan health</h4>
+      <div class="health-status"><span class="dot" id="healthDot"></span><span id="healthLabel">On track</span></div>
+      <p class="health-desc" id="healthDesc">You're completing <b>100%</b> of your planned work.</p>
+    </div>
+    <div class="side-card">
+      <h4>Your subjects</h4>
+      <div id="subjList"></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function(){
+  /* ---------------- CURRICULUM ---------------- */
+  const CURRICULUM = {
+    phy:{ name:'Physics', teacher:'Rajat Singh Sir', chapters:[
+      ['Units, Dimensions and Measurement',4],['Vectors & Kinematics',6],['Laws of Motion',5],
+      ['Work, Power & Energy',4],['Rotational Motion',6],['Gravitation',3],
+      ['Thermal Physics',5],['SHM & Waves',5],['Electrostatics',6],
+      ['Current Electricity',5],['Magnetism & EMI',6],['Optics',5],['Modern Physics',5]]},
+    oc:{ name:'Organic Chemistry', teacher:'Ankit Verma Sir', chapters:[
+      ['GOC - 1 & 2',6],['Isomerism',4],['Hydrocarbons',5],['Haloalkanes & Haloarenes',4],
+      ['Alcohols, Phenols & Ethers',4],['Aldehydes, Ketones & Acids',5],['Amines & Biomolecules',4]]},
+    pc:{ name:'Physical Chemistry', teacher:'S. Mishra Sir', chapters:[
+      ['Mole Concept',5],['Atomic Structure',4],['Thermodynamics & Thermochemistry',5],
+      ['Chemical & Ionic Equilibrium',5],['Electrochemistry',4],['Chemical Kinetics',4],['Solutions & Solid State',4]]},
+    ioc:{ name:'Inorganic Chemistry', teacher:'P. Dubey Sir', chapters:[
+      ['Periodic Table & Properties',4],['Chemical Bonding',6],['p-Block Elements',5],
+      ['d & f Block',3],['Coordination Compounds',5],['Salt Analysis',3]]},
+    math:{ name:'Mathematics', teacher:'V. Tiwari Sir', chapters:[
+      ['Basic Maths & Quadratics',5],['Sequence & Series',4],['Trigonometry',5],
+      ['Straight Lines & Circles',6],['Conic Sections',5],['Permutations & Probability',5],
+      ['Matrices & Determinants',4],['Limits, Continuity & Differentiability',6],
+      ['Application of Derivatives',4],['Integration & AOI',6],['Vectors & 3D',5]]}
+  };
+
+  /* ---------------- PLAN ---------------- */
+  let plan = {};
+  try{ plan = JSON.parse(localStorage.getItem('jee360.plan')||'{}'); }catch(e){}
+  let subjects = (plan.subjects||[]).filter(k=>CURRICULUM[k]);
+  if(!subjects.length) subjects = Object.keys(CURRICULUM);
+  const days  = plan.days  || 90;
+  const speed = plan.speed || 1.25;
+  const mode  = plan.mode  || 'weekly';
+
+  if(!plan.startDate){ plan.startDate = new Date().toISOString().slice(0,10);
+    localStorage.setItem('jee360.plan', JSON.stringify(Object.assign(plan,{subjects,days,speed,mode}))); }
+
+  /* ---------------- BUILD TASKS ---------------- */
+  function buildSubjectTasks(key){
+    const s = CURRICULUM[key]; const tasks = []; let lecNo = 0;
+    s.chapters.forEach((ch, ci)=>{
+      const [chName, lecCount] = ch;
+      for(let i=1;i<=lecCount;i++){
+        lecNo++;
+        const lecMins = 70 + ((lecNo*37 + ci*11) % 45);       // 70–114 min at 1x
+        const dppMins = 30 + ((lecNo*23) % 25);               // 30–54 min
+        const chLabel = 'Ch - ' + String(ci+1).padStart(2,'0') + ' : ' + chName;
+        tasks.push({ id:key+'-L'+lecNo, subj:key, type:'LECTURE', mins:lecMins, scaled:true,
+          title:String(lecNo).padStart(2,'0') + ' : ' + chName + ' (Part - ' + String(i).padStart(2,'0') + ')',
+          chap:chLabel });
+        tasks.push({ id:key+'-D'+lecNo, subj:key, type:'DPP', mins:dppMins, scaled:false,
+          title:'DPP ' + String(lecNo).padStart(2,'0') + ' (Of Lec ' + String(lecNo).padStart(2,'0') + ')',
+          chap:chLabel });
+      }
+    });
+    return tasks;
+  }
+
+  const bySubject = {};
+  subjects.forEach(k=> bySubject[k] = buildSubjectTasks(k));
+
+  // ordering: weekly = round-robin across subjects (lecture+dpp pairs), single = sequential
+  let allTasks = [];
+  if(mode === 'single'){
+    subjects.forEach(k=> allTasks.push(...bySubject[k]));
+  }else{
+    const idx = {}; subjects.forEach(k=>idx[k]=0);
+    let remaining = subjects.reduce((s,k)=>s+bySubject[k].length,0);
+    while(remaining>0){
+      for(const k of subjects){
+        const arr = bySubject[k];
+        for(let c=0;c<2 && idx[k]<arr.length;c++){ allTasks.push(arr[idx[k]++]); remaining--; }
+      }
+    }
+  }
+
+  /* ---------------- STATE ---------------- */
+  let done = new Set();
+  try{ done = new Set(JSON.parse(localStorage.getItem('jee360.done')||'[]')); }catch(e){}
+  const saveDone = ()=> localStorage.setItem('jee360.done', JSON.stringify([...done]));
+
+  const effMins = t => t.scaled ? t.mins/speed : t.mins;
+  const totalEffMins = allTasks.reduce((s,t)=>s+effMins(t),0);
+  const quota = totalEffMins / days;
+
+  /* today's list: stored per date */
+  const todayKey = new Date().toISOString().slice(0,10);
+  let todayIds = null;
+  try{
+    const saved = JSON.parse(localStorage.getItem('jee360.today')||'null');
+    if(saved && saved.date===todayKey) todayIds = saved.ids;
+  }catch(e){}
+
+  function pickToday(){
+    const ids=[]; let acc=0;
+    for(const t of allTasks){
+      if(done.has(t.id)) continue;
+      ids.push(t.id); acc += effMins(t);
+      if(acc >= quota && ids.length>=3) break;
+    }
+    return ids;
+  }
+  if(!todayIds){ todayIds = pickToday();
+    localStorage.setItem('jee360.today', JSON.stringify({date:todayKey, ids:todayIds})); }
+  const saveToday = ()=> localStorage.setItem('jee360.today', JSON.stringify({date:todayKey, ids:todayIds}));
+
+  const taskById = {}; allTasks.forEach(t=>taskById[t.id]=t);
+
+  function fmt(mins){
+    mins=Math.round(mins);
+    const h=Math.floor(mins/60), m=mins%60;
+    return (h? h+'h ':'') + m + 'm';
+  }
+
+  /* ---------------- RENDER ---------------- */
+  function render(){
+    const todayTasks = todayIds.map(id=>taskById[id]).filter(Boolean);
+    const pendingToday = todayTasks.filter(t=>!done.has(t.id));
+    const leftMins = pendingToday.reduce((s,t)=>s+effMins(t),0);
+    const totMins  = todayTasks.reduce((s,t)=>s+effMins(t),0);
+    const pctToday = todayTasks.length? Math.round((todayTasks.length-pendingToday.length)/todayTasks.length*100):0;
+
+    document.getElementById('overall').textContent = done.size + ' of ' + allTasks.length + ' done';
+    document.getElementById('todayTotal').textContent = '🕐 ' + fmt(totMins);
+    document.getElementById('planSub').innerHTML =
+      '<b>' + pctToday + '% completed</b> · ' + pendingToday.length + ' to go · ' +
+      fmt(leftMins) + ' left <span style="color:#b6bdd8">at ' + speed + 'x</span>';
+
+    const list = document.getElementById('taskList');
+    if(!pendingToday.length){
+      list.innerHTML = '<div class="all-done">🎉 All done for today! Come back tomorrow — your streak is safe.</div>';
+    }else{
+      list.innerHTML = pendingToday.map(t=>{
+        const s = CURRICULUM[t.subj];
+        const timeStr = t.scaled
+          ? '🕐 <b>'+fmt(t.mins/speed)+'</b> <small>· '+fmt(t.mins)+' at 1x</small>'
+          : '🕐 <b>'+fmt(t.mins)+'</b>';
+        return `
+        <div class="task">
+          <div class="t-top">
+            <span><span class="subj">${s.name}</span><span class="teacher">${s.teacher}</span></span>
+            <span class="type">${t.type}</span>
+          </div>
+          <h3>${t.title}</h3>
+          <p class="chap">${t.chap} ↗</p>
+          <div class="t-bottom">
+            <span class="time">${timeStr}</span>
+            <span class="actions">
+              <button class="btn" data-move="${t.id}">⏭ Move</button>
+              <button class="btn done-btn" data-done="${t.id}">✓ Done</button>
+            </span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    /* sidebar */
+    const startDate = new Date(plan.startDate || todayKey);
+    const elapsed = Math.max(1, Math.floor((Date.now()-startDate.getTime())/86400000)+1);
+    const expected = allTasks.length * Math.min(1, elapsed/days);
+    const ratio = expected>0 ? Math.min(100, Math.round((done.size/expected)*100)) : 100;
+    const onTrack = ratio>=80 || done.size>=expected;
+    document.getElementById('healthLabel').textContent = onTrack? 'On track' : 'Catching up';
+    document.getElementById('healthDot').className = 'dot' + (onTrack?'':' warn');
+    document.getElementById('healthDesc').innerHTML =
+      "You're completing <b>" + (expected<1?100:ratio) + "%</b> of your planned work.";
+
+    document.getElementById('subjList').innerHTML = subjects.map(k=>{
+      const arr = bySubject[k];
+      const d = arr.filter(t=>done.has(t.id)).length;
+      const pct = Math.round(d/arr.length*100);
+      return `
+        <div class="subj-row">
+          <span><span class="nm">${CURRICULUM[k].name}</span><span class="tch">${CURRICULUM[k].teacher}</span></span>
+          <span class="pct">${pct}%</span>
+        </div>
+        <div class="bar"><i style="width:${pct}%"></i></div>`;
+    }).join('');
+
+    /* events */
+    list.querySelectorAll('[data-done]').forEach(b=>{
+      b.addEventListener('click', ()=>{ done.add(b.dataset.done); saveDone(); render(); });
+    });
+    list.querySelectorAll('[data-move]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const id = b.dataset.move;
+        todayIds = todayIds.filter(x=>x!==id);
+        // pull in next pending task not already in today
+        for(const t of allTasks){
+          if(!done.has(t.id) && !todayIds.includes(t.id) && t.id!==id){ todayIds.push(t.id); break; }
+        }
+        saveToday(); render();
+      });
+    });
+  }
+
+  render();
+})();
+</script>
+
+</body>
+</html>
