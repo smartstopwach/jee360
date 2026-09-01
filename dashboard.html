@@ -85,7 +85,11 @@
   .f-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
 
   /* ---------- DAY SECTIONS ---------- */
-  .day-section{margin-bottom:28px;}
+  .day-section{margin-bottom:26px;border-radius:16px;padding:12px 12px 6px;
+    border:1.5px solid transparent;}
+  .day-section .day-head{border:none;color:#fff;}
+  .day-section .day-head .dh-time{color:rgba(255,255,255,.92);}
+  .day-section .today-tag{background:rgba(255,255,255,.25);}
   .day-head{
     display:flex;justify-content:space-between;align-items:center;
     font-weight:800;color:#1c2340;padding:10px 16px;
@@ -758,9 +762,15 @@
         rows = tasksD.length ? tasksD.map(t=>miniRow(t)+dppRow(t)).join('') : '<p class="day-note">Koi task nahi — buffer day 😌</p>';
       }
 
+      /* har din apna rang — 10 colour rotate hote hain, scroll karte hi
+         pata chale ki naya din shuru ho gaya */
+      const PAL = ['#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444',
+                   '#8b5cf6','#ec4899','#14b8a6','#84cc16','#f97316'];
+      const dc = PAL[(d-1) % PAL.length];
       html += `
-      <div class="day-section${isToday?' today':''}">
-        <div class="day-head">
+      <div class="day-section${isToday?' today':''}"
+           style="background:${dc}12;border-color:${dc}55">
+        <div class="day-head" style="background:linear-gradient(120deg,${dc},${dc}cc)">
           <span>📅 Day ${d} · ${dateFor(d)}${isToday?'<span class="today-tag">AAJ</span>':''}</span>
           <span class="dh-time">${fmt(headTime)}</span>
         </div>
