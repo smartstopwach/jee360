@@ -234,12 +234,18 @@
     localStorage.setItem('jee360.plan', JSON.stringify(Object.assign(plan,{subjects,days,speed,mode}))); }
 
   /* ---------------- BUILD TASKS ---------------- */
+  let chSel = {};
+  try{ chSel = JSON.parse(localStorage.getItem('jee360.chapters')||'{}'); }catch(e){}
+  const chapterOn = (key, ch) => !Array.isArray(chSel[key]) || chSel[key].includes(ch.no);
+
   function buildSubjectTasks(key){
     const s = CURRICULUM[key]; const tasks = []; let lecNo = 0, dppNo = 0;
     s.chapters.forEach((ch, ci)=>{
+      const on = chapterOn(key, ch);          // user-selected chapters only
       const chLabel = 'Ch - ' + String(ch.no).padStart(2,'0') + ' : ' + ch.name;
       for(let i=1;i<=ch.v;i++){
-        lecNo++;
+        lecNo++;                              // numbering stable, selection se nahi badalti
+        if(!on) continue;
         const L = ch.lectures && ch.lectures[i-1];   // real lecture data if available
         const lecMins = L ? L.d : 120;   // default: 2h at 1x (jab tak real duration na aaye)
         const title = L

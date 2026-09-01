@@ -146,7 +146,7 @@
   <div class="steps">
     <span class="done"></span><span class="done"></span><span></span><span></span>
   </div>
-  <a class="back" href="index.html">‹ Back</a>
+  <a class="back" href="chapters.html">‹ Back</a>
   <h1>How fast do you want to prepare?</h1>
   <p class="subtitle">Choose a timeline based on how much time you can study every day.</p>
   <div class="chips" id="chips"></div>
@@ -193,8 +193,20 @@
   if(!keys.length) keys = Object.keys(SUBJECTS);
   keys = keys.filter(k=>SUBJECTS[k]);
 
-  const totLec  = keys.reduce((s,k)=>s+SUBJECTS[k].lec, 0);
-  const totPrac = keys.reduce((s,k)=>s+SUBJECTS[k].prac,0);
+  let chSel = {};
+  try{ chSel = JSON.parse(localStorage.getItem('jee360.chapters')||'{}'); }catch(e){}
+  const chapLecMins = ch => ch.lectures ? ch.lectures.reduce((a,l)=>a+l.d,0) : ch.v*120;
+  let totLecMins = 0, selV = 0, allV = 0, pracH = 0;
+  keys.forEach(k=>{
+    const S = SUBJECTS[k];
+    S.chapters.forEach(ch=>{
+      allV += ch.v;
+      const on = !Array.isArray(chSel[k]) || chSel[k].includes(ch.no);
+      if(on){ totLecMins += chapLecMins(ch); selV += ch.v; }
+    });
+    pracH += S.prac;
+  });
+  const totPrac = pracH * (allV ? selV/allV : 1);   // DPP hours proportional to selection
 
   // chips
   document.getElementById('chips').innerHTML =
@@ -209,7 +221,7 @@
     return h + 'h ' + (m<10?'0':'') + m + 'm';
   }
   function dailyMins(days){
-    return (totLec*60/speed + totPrac*60) / days;
+    return (totLecMins/speed + totPrac*60) / days;
   }
 
   const paceList = document.getElementById('paceList');
@@ -235,7 +247,7 @@
   }
 
   function renderSummary(){
-    const lecM  = totLec*60/speed/chosenDays;
+    const lecM  = totLecMins/speed/chosenDays;
     const pracM = totPrac*60/chosenDays;
     document.getElementById('atSpeed').textContent  = 'at ' + speed + 'x';
     document.getElementById('sumLec').textContent   = fmt(lecM);
