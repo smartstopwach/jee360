@@ -6,7 +6,7 @@
 (function(){
   /* VAPID public key — Firebase Console → Project settings →
      Cloud Messaging → Web Push certificates se milti hai */
-  var VAPID = 'PASTE_VAPID_KEY_HERE';
+  var VAPID = 'BLS_irQFx2FHSBC1s-B2s6xNTTfUMNplr6Mjl_PEhQeoOOlIlhYGc5hNti-0h_x6kh_b_yzZ1SnHKMiGqAPlTuI';
 
   var isApp =
     window.matchMedia('(display-mode: standalone)').matches ||
