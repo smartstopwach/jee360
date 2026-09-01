@@ -5,9 +5,12 @@
    read from this file.
 
    FORMAT:
-   chapters: [{ no, name, v, e, n }]
+   chapters: [{ no, name, v, e, n, lectures? }]
      no = real chapter number in the batch
      v  = videos (lectures), e = exercises (DPPs), n = notes
+     lectures (optional) = REAL per-lecture data:
+       [{ t:"title", d:duration_in_minutes, date:"YYYY-MM-DD" }]
+       When present, dashboard uses real titles & durations.
    Chapter ORDER in the array = priority / study order.
 
    lec  : total lecture hours for the subject (at 1x)
@@ -35,7 +38,17 @@ window.JEE360_DATA = {
       lec: 288,   // ~230 lectures × ~75 min avg (until real durations arrive)
       prac: 94,   // ~141 DPPs × ~40 min avg
       chapters: [
-        { no:1,  name:"Mathematical Tools",                  v:7,  e:6,  n:13 },
+        { no:1,  name:"Mathematical Tools",                  v:7,  e:6,  n:13,
+          lectures: [
+            { t:"Basic Mathematical Tool || NO DPP",  d:110, date:"2024-06-15" },
+            { t:"Basic Maths, Vectors, Types Of Vector, Angle b/w Vector", d:127, date:"2024-06-16" },
+            { t:"Triangle Law, Resultant Of Two Vectors", d:130, date:"2024-06-17" },
+            { t:"Question Practice On Triangle Law, Parallelogram, Polygon Law, Position Vector, Unit Vector", d:124, date:"2024-06-18" },
+            { t:"Application Of Unit Vector, Component Of Vector", d:130, date:"2024-06-20" },
+            { t:"Dot Product & Application, Component Of One Vector Along Another Vector", d:146, date:"2024-06-22" },
+            { t:"KPP 01 Discussion || Recorded", d:37, date:"2024-06-24" }
+          ]
+        },
         { no:2,  name:"Motion In Straight Line",             v:11, e:7,  n:19 },
         { no:3,  name:"Motion In A Plane",                   v:8,  e:8,  n:17 },
         { no:9,  name:"Oscillations",                        v:9,  e:7,  n:17 },

@@ -173,9 +173,13 @@
       const chLabel = 'Ch - ' + String(ch.no).padStart(2,'0') + ' : ' + ch.name;
       for(let i=1;i<=ch.v;i++){
         lecNo++;
-        const lecMins = 70 + ((lecNo*37 + ci*11) % 45);       // 70–114 min at 1x (until real durations)
+        const L = ch.lectures && ch.lectures[i-1];   // real lecture data if available
+        const lecMins = L ? L.d : 70 + ((lecNo*37 + ci*11) % 45);  // real duration, else estimate
+        const title = L
+          ? ch.name + ' ' + String(i).padStart(2,'0') + ' : ' + L.t
+          : String(lecNo).padStart(2,'0') + ' : ' + ch.name + (ch.v>1 ? ' (Lecture ' + String(i).padStart(2,'0') + ')' : '');
         tasks.push({ id:key+'-L'+lecNo, subj:key, type:'LECTURE', mins:lecMins, scaled:true,
-          title:String(lecNo).padStart(2,'0') + ' : ' + ch.name + (ch.v>1 ? ' (Lecture ' + String(i).padStart(2,'0') + ')' : ''),
+          title:title,
           chap:chLabel });
       }
       for(let j=1;j<=ch.e;j++){
