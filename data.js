@@ -35,8 +35,8 @@ window.JEE360_DATA = {
       teacher: "Saleem Ahmad Sir",
       estimated: false,
       durationsPending: true,
-      lec: 460,  // 230 lectures × ~120 min real avg (from Ch-01/02 samples)
-      prac: 94,  // ~141 DPPs × ~40 min avg
+      lec: 288,   // ~230 lectures × ~75 min avg (until real durations arrive)
+      prac: 94,   // ~141 DPPs × ~40 min avg
       chapters: [
         { no:1,  name:"Mathematical Tools",                  v:7,  e:6,  n:13,
           lectures: [
