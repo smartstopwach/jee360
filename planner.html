@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JEE360 Study Planner — How fast do you want to prepare?</title>
+<style>
+  :root{
+    --bg:#f7f8fc;
+    --card:#ffffff;
+    --ink:#1c2340;
+    --muted:#8a93b5;
+    --accent:#7b8cf5;
+    --accent-dark:#5b6ee8;
+    --border:#e6e9f4;
+    --green:#22a06b;
+    --blue:#4a7dd8;
+    --orange:#d97742;
+    --red:#e05b8a;
+    --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;
+  }
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 5%;
+    background:#fff;border-bottom:1px solid var(--border);
+    position:sticky;top:0;z-index:20;
+  }
+  .brand{font-size:1.05rem;color:var(--ink);text-decoration:none;}
+  .brand b{font-weight:800;}
+  .brand span{color:var(--accent-dark);font-weight:600;margin-left:6px;}
+  .avatar{
+    width:36px;height:36px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),#22d3ee);
+    color:#fff;font-weight:800;font-size:.9rem;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .wrap{max-width:760px;margin:0 auto;padding:36px 20px 80px;}
+
+  .back{
+    display:inline-flex;align-items:center;gap:6px;
+    color:var(--muted);text-decoration:none;font-weight:600;font-size:.95rem;
+    margin-bottom:18px;
+  }
+  .back:hover{color:var(--accent-dark);}
+
+  h1{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:800;margin-bottom:8px;}
+  .subtitle{color:var(--muted);margin-bottom:14px;font-size:1.02rem;}
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:34px;}
+  .chip{
+    padding:5px 14px;border-radius:999px;font-size:.82rem;font-weight:700;
+    background:#eef1fd;color:var(--accent-dark);border:1px solid #dde3fb;
+  }
+
+  /* ---------- PACE CARDS ---------- */
+  .pace{
+    background:var(--card);
+    border:2px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px 24px;
+    margin-bottom:16px;
+    cursor:pointer;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .pace:hover{border-color:#c9d2f7;}
+  .pace.active{
+    border-color:var(--accent);
+    box-shadow:0 6px 24px rgba(123,140,245,.16);
+  }
+  .pace .p-days{font-size:1.15rem;font-weight:800;}
+  .pace .p-name{color:var(--accent-dark);font-weight:700;font-size:.95rem;margin-left:8px;}
+  .pace .p-desc{color:var(--muted);font-size:.93rem;margin:4px 0 6px;}
+  .pace .p-daily{font-size:.95rem;font-weight:600;color:#4a536e;}
+  .tag{
+    flex-shrink:0;font-size:.85rem;font-weight:800;margin-top:4px;
+  }
+  .tag.comfortable{color:var(--green);}
+  .tag.balanced{color:var(--blue);}
+  .tag.demanding{color:var(--orange);}
+  .tag.notideal{color:var(--red);}
+
+  /* ---------- SPEED ---------- */
+  .speed-section{margin:38px 0 30px;}
+  .speed-section h3{font-size:1.05rem;font-weight:700;margin-bottom:4px;}
+  .speed-section .hint{color:var(--muted);font-size:.92rem;margin-bottom:16px;}
+  .speed-row{display:flex;gap:12px;align-items:center;justify-content:space-between;max-width:520px;margin:0 auto;}
+  .speed-btn{
+    flex:1;padding:12px 0;text-align:center;
+    border-radius:999px;border:1.5px solid var(--border);
+    background:#fff;color:var(--ink);font-weight:700;font-size:.98rem;
+    cursor:pointer;transition:all .15s;
+  }
+  .speed-btn:hover{border-color:var(--accent);}
+  .speed-btn.active{
+    background:var(--accent);border-color:var(--accent);color:#fff;
+    box-shadow:0 6px 18px rgba(123,140,245,.35);
+  }
+
+  /* ---------- SUMMARY ---------- */
+  .summary{
+    background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+    padding:22px 26px;
+  }
+  .summary .lead{color:var(--muted);font-size:.95rem;margin-bottom:16px;}
+  .summary .lead b{color:var(--ink);}
+  .srow{
+    display:flex;justify-content:space-between;
+    padding:10px 0;border-top:1px dashed var(--border);
+    font-size:.96rem;color:#4a536e;
+  }
+  .srow .lbl em{font-style:normal;color:var(--muted);font-size:.85rem;}
+  .srow.total{font-weight:800;color:var(--ink);border-top:1.5px solid var(--border);font-size:1.02rem;}
+
+  .cta-row{text-align:center;margin-top:34px;}
+  .cta-btn{
+    display:inline-block;padding:14px 42px;border-radius:999px;border:none;
+    background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+    color:#fff;font-weight:800;font-size:1.05rem;cursor:pointer;
+    box-shadow:0 10px 26px rgba(91,110,232,.3);
+    transition:transform .15s;
+  }
+  .cta-btn:hover{transform:translateY(-2px);}
+  .note{color:var(--muted);font-size:.85rem;margin-top:12px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="index.html"><b>JEE360</b><span>Study Planner</span></a>
+  <div class="avatar">J</div>
+</div>
+
+<div class="wrap">
+  <a class="back" href="index.html">‹ Back</a>
+  <h1>How fast do you want to prepare?</h1>
+  <p class="subtitle">Choose a timeline based on how much time you can study every day.</p>
+  <div class="chips" id="chips"></div>
+
+  <div id="paceList"></div>
+
+  <div class="speed-section">
+    <h3>Playback Speed</h3>
+    <p class="hint">How do you usually watch lectures?</p>
+    <div class="speed-row" id="speedRow">
+      <button class="speed-btn" data-speed="1">1x</button>
+      <button class="speed-btn active" data-speed="1.25">1.25x</button>
+      <button class="speed-btn" data-speed="1.5">1.5x</button>
+    </div>
+  </div>
+
+  <div class="summary">
+    <p class="lead">Based on your choices, you'll need approximately <b id="sumHeadline">—</b>.</p>
+    <div class="srow"><span class="lbl">Lecture Time <em id="atSpeed">at 1.25x</em></span><span id="sumLec">—</span></div>
+    <div class="srow"><span class="lbl">DPP / Practice</span><span id="sumPrac">—</span></div>
+    <div class="srow total"><span>Total</span><span id="sumTotal">—</span></div>
+  </div>
+
+  <div class="cta-row">
+    <button class="cta-btn" id="createPlan">Create My Study Plan ✓</button>
+    <p class="note" id="planNote"></p>
+  </div>
+</div>
+
+<script>
+(function(){
+  // subject data: lecture & practice hours
+  const SUBJECTS = {
+    phy:  { name:'Physics',             lec:220, prac:110 },
+    oc:   { name:'Organic Chemistry',   lec:95,  prac:50  },
+    pc:   { name:'Physical Chemistry',  lec:85,  prac:45  },
+    ioc:  { name:'Inorganic Chemistry', lec:70,  prac:35  },
+    math: { name:'Mathematics',         lec:240, prac:120 }
+  };
+
+  const PACES = [
+    { days:150, name:'Relaxed Pace',  desc:'Steady coverage with plenty of buffer for revision and tests.' },
+    { days:120, name:'Balanced Pace', desc:'A more manageable daily workload with consistent progress.' },
+    { days:90,  name:'Fast Pace',     desc:'A more intensive plan for students who want to finish faster.' },
+    { days:60,  name:'Sprint',        desc:'Crash-course intensity. Only if you can go all in, every day.' }
+  ];
+
+  // read selected subjects (fallback: all)
+  let keys = [];
+  try{ keys = JSON.parse(localStorage.getItem('jee360.subjects')||'[]'); }catch(e){}
+  if(!keys.length) keys = Object.keys(SUBJECTS);
+  keys = keys.filter(k=>SUBJECTS[k]);
+
+  const totLec  = keys.reduce((s,k)=>s+SUBJECTS[k].lec, 0);
+  const totPrac = keys.reduce((s,k)=>s+SUBJECTS[k].prac,0);
+
+  // chips
+  document.getElementById('chips').innerHTML =
+    keys.map(k=>'<span class="chip">'+SUBJECTS[k].name+'</span>').join('');
+
+  let speed = 1.25;
+  let chosenDays = 120;
+
+  function fmt(mins){
+    mins = Math.round(mins);
+    const h = Math.floor(mins/60), m = mins%60;
+    return h + 'h ' + (m<10?'0':'') + m + 'm';
+  }
+  function dailyMins(days){
+    return (totLec*60/speed + totPrac*60) / days;
+  }
+  function tagFor(mins){
+    const h = mins/60;
+    if(h <= 5.5) return ['Comfortable','comfortable'];
+    if(h <= 8)   return ['Balanced','balanced'];
+    if(h <= 11)  return ['Demanding','demanding'];
+    return ['Not ideal','notideal'];
+  }
+
+  const paceList = document.getElementById('paceList');
+  function renderPaces(){
+    paceList.innerHTML = PACES.map(p=>{
+      const dm = dailyMins(p.days);
+      const [label, cls] = tagFor(dm);
+      return `
+        <div class="pace ${p.days===chosenDays?'active':''}" data-days="${p.days}">
+          <div>
+            <span class="p-days">${p.days} Days</span><span class="p-name">${p.name}</span>
+            <p class="p-desc">${p.desc}</p>
+            <p class="p-daily">about ${fmt(dm)} a day</p>
+          </div>
+          <span class="tag ${cls}">${label}</span>
+        </div>`;
+    }).join('');
+    paceList.querySelectorAll('.pace').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        chosenDays = +el.dataset.days;
+        renderPaces(); renderSummary();
+      });
+    });
+  }
+
+  function renderSummary(){
+    const lecM  = totLec*60/speed/chosenDays;
+    const pracM = totPrac*60/chosenDays;
+    document.getElementById('atSpeed').textContent  = 'at ' + speed + 'x';
+    document.getElementById('sumLec').textContent   = fmt(lecM);
+    document.getElementById('sumPrac').textContent  = fmt(pracM);
+    document.getElementById('sumTotal').textContent = fmt(lecM+pracM) + '/day';
+    document.getElementById('sumHeadline').textContent = fmt(lecM+pracM) + '/day';
+  }
+
+  document.querySelectorAll('.speed-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('.speed-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      speed = +b.dataset.speed;
+      renderPaces(); renderSummary();
+    });
+  });
+
+  document.getElementById('createPlan').addEventListener('click', ()=>{
+    localStorage.setItem('jee360.plan', JSON.stringify({subjects:keys, days:chosenDays, speed:speed}));
+    const end = new Date(Date.now() + chosenDays*86400000);
+    document.getElementById('planNote').textContent =
+      '✅ Plan saved! ' + chosenDays + ' days · ' + speed + 'x · finish by ' +
+      end.toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}) + '.';
+  });
+
+  renderPaces();
+  renderSummary();
+})();
+</script>
+
+</body>
+</html>

@@ -181,6 +181,37 @@
   }
   footer a{color:var(--accent);text-decoration:none;}
 
+  /* ---------- SUBJECT SELECTION ---------- */
+  .card{cursor:pointer;user-select:none;}
+  .card .check{
+    position:absolute;top:14px;right:14px;
+    width:26px;height:26px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.25);
+    display:flex;align-items:center;justify-content:center;
+    font-size:.85rem;color:transparent;font-weight:900;
+    transition:all .2s;
+  }
+  .card.selected{
+    border-color:var(--sub-color);
+    background:var(--card-hover);
+    box-shadow:0 0 0 1px var(--sub-color), 0 10px 30px rgba(0,0,0,.35);
+  }
+  .card.selected .check{
+    background:var(--sub-color);border-color:var(--sub-color);color:#0b1020;
+  }
+  .continue-bar{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    display:flex;align-items:center;justify-content:center;gap:18px;
+    padding:14px 6%;
+    background:rgba(11,16,32,.92);backdrop-filter:blur(12px);
+    border-top:1px solid rgba(255,255,255,.1);
+    transform:translateY(110%);transition:transform .3s ease;
+  }
+  .continue-bar.show{transform:translateY(0);}
+  .continue-bar .sel-info{color:var(--muted);font-size:.95rem;font-weight:600;}
+  .continue-bar .sel-info b{color:var(--text);}
+  .continue-bar .btn-primary{cursor:pointer;border:none;font-size:1rem;}
+
   @media (max-width:640px){
     .nav-links li:not(:last-child){display:none;}
   }
@@ -224,7 +255,8 @@
   </div>
   <div class="grid">
 
-    <div class="card phy">
+    <div class="card phy" data-subject="phy" data-name="Physics" data-lec="220" data-prac="110">
+      <div class="check">✓</div>
       <div class="icon">🧲</div>
       <span class="sub-tag">Physics</span>
       <h3>Physics</h3>
@@ -236,10 +268,11 @@
         <li>Optics &amp; Modern Physics</li>
         <li>Thermodynamics &amp; Waves</li>
       </ul>
-      <a class="card-link" href="#start">Explore Physics</a>
+      <span class="card-link">Select Physics</span>
     </div>
 
-    <div class="card oc">
+    <div class="card oc" data-subject="oc" data-name="Organic Chemistry" data-lec="95" data-prac="50">
+      <div class="check">✓</div>
       <div class="icon">🧪</div>
       <span class="sub-tag">OC — Chemistry</span>
       <h3>Organic Chemistry</h3>
@@ -251,10 +284,11 @@
         <li>Amines &amp; Biomolecules</li>
         <li>Name Reactions &amp; Conversions</li>
       </ul>
-      <a class="card-link" href="#start">Explore OC</a>
+      <span class="card-link">Select OC</span>
     </div>
 
-    <div class="card pc">
+    <div class="card pc" data-subject="pc" data-name="Physical Chemistry" data-lec="85" data-prac="45">
+      <div class="check">✓</div>
       <div class="icon">⚗️</div>
       <span class="sub-tag">PC — Chemistry</span>
       <h3>Physical Chemistry</h3>
@@ -266,10 +300,11 @@
         <li>Solutions &amp; Solid State</li>
         <li>Atomic Structure</li>
       </ul>
-      <a class="card-link" href="#start">Explore PC</a>
+      <span class="card-link">Select PC</span>
     </div>
 
-    <div class="card ioc">
+    <div class="card ioc" data-subject="ioc" data-name="Inorganic Chemistry" data-lec="70" data-prac="35">
+      <div class="check">✓</div>
       <div class="icon">🔬</div>
       <span class="sub-tag">IOC — Chemistry</span>
       <h3>Inorganic Chemistry</h3>
@@ -281,10 +316,11 @@
         <li>Salt Analysis</li>
         <li>Metallurgy &amp; Environmental</li>
       </ul>
-      <a class="card-link" href="#start">Explore IOC</a>
+      <span class="card-link">Select IOC</span>
     </div>
 
-    <div class="card math">
+    <div class="card math" data-subject="math" data-name="Mathematics" data-lec="240" data-prac="120">
+      <div class="check">✓</div>
       <div class="icon">📐</div>
       <span class="sub-tag">Mathematics</span>
       <h3>Maths</h3>
@@ -296,7 +332,7 @@
         <li>Vectors &amp; 3D Geometry</li>
         <li>Probability &amp; PnC</li>
       </ul>
-      <a class="card-link" href="#start">Explore Maths</a>
+      <span class="card-link">Select Maths</span>
     </div>
 
   </div>
@@ -340,6 +376,47 @@
 <footer>
   <p>© 2026 JEE360 · Built for JEE aspirants · <a href="https://github.com/smartstopwach/jee360">GitHub</a></p>
 </footer>
+
+<div class="continue-bar" id="continueBar">
+  <span class="sel-info"><b id="selCount">0</b> subjects selected</span>
+  <button class="btn btn-primary" id="continueBtn">Continue → Build My Plan</button>
+</div>
+
+<script>
+(function(){
+  const cards = document.querySelectorAll('.card[data-subject]');
+  const bar = document.getElementById('continueBar');
+  const countEl = document.getElementById('selCount');
+  const btn = document.getElementById('continueBtn');
+  let selected = new Set();
+
+  // restore previous selection
+  try{
+    (JSON.parse(localStorage.getItem('jee360.subjects')||'[]')).forEach(k=>selected.add(k));
+  }catch(e){}
+
+  function refresh(){
+    cards.forEach(c=>c.classList.toggle('selected', selected.has(c.dataset.subject)));
+    countEl.textContent = selected.size;
+    bar.classList.toggle('show', selected.size>0);
+  }
+
+  cards.forEach(c=>{
+    c.addEventListener('click', ()=>{
+      const k=c.dataset.subject;
+      selected.has(k) ? selected.delete(k) : selected.add(k);
+      refresh();
+    });
+  });
+
+  btn.addEventListener('click', ()=>{
+    localStorage.setItem('jee360.subjects', JSON.stringify([...selected]));
+    window.location.href = 'planner.html';
+  });
+
+  refresh();
+})();
+</script>
 
 </body>
 </html>
