@@ -2,6 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+/* Returning user: plan ban chuka hai toh seedha dashboard —
+   front page sirf first-time ke liye.
+   (Front page dekhna ho toh: index.html?home) */
+try{
+  if(localStorage.getItem('jee360.plan') && location.search.indexOf('home') < 0){
+    location.replace('dashboard.html');
+  }
+}catch(e){}
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JEE360 — Your Complete JEE Companion</title>
 <style>
