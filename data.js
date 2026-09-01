@@ -49,7 +49,21 @@ window.JEE360_DATA = {
             { t:"KPP 01 Discussion || Recorded", d:37, date:"2024-06-24" }
           ]
         },
-        { no:2,  name:"Motion In Straight Line",             v:11, e:7,  n:19 },
+        { no:2,  name:"Motion In Straight Line",             v:11, e:7,  n:19,
+          lectures: [
+            { t:"Distance, Displacement, Average Speed, Average Velocity, Instantaneous Speed || NO DPP", d:120, date:"2024-06-23" },
+            { t:"Velocity, Acceleration, Differentiation || NO DPP", d:134, date:"2024-06-25" },
+            { t:"Average Acceleration, Average Speed, Average Velocity, Graph", d:123, date:"2024-06-26" },
+            { t:"Graph || Integration", d:119, date:"2024-06-27" },
+            { t:"Extra Lecture : Integration, Differentiation, Max-Min || NO DPP", d:54, date:"2024-06-27" },
+            { t:"Graph", d:133, date:"2024-06-29" },
+            { t:"Graph Conversion", d:125, date:"2024-06-30" },
+            { t:"Graph Conversion, Equation Of Motion", d:128, date:"2024-07-01" },
+            { t:"Motion Under Gravity, Equation Of Motion", d:132, date:"2024-07-02" },
+            { t:"Motion Under Gravity, Equation Of Motion (Part- 02)", d:126, date:"2024-07-03" },
+            { t:"Motion Under Gravity, Projectile Motion || NO DPP", d:132, date:"2024-07-04" }
+          ]
+        },
         { no:3,  name:"Motion In A Plane",                   v:8,  e:8,  n:17 },
         { no:9,  name:"Oscillations",                        v:9,  e:7,  n:17 },
         { no:4,  name:"Laws Of Motion",                      v:13, e:8,  n:21 },
