@@ -111,6 +111,11 @@
     border:1.5px solid #f3c6d8;color:#e05b8a;background:#fff;font-weight:800;cursor:pointer;
   }
   .mini-undo:hover{background:#fdf0f5;border-color:#e05b8a;}
+  .mini-pull{
+    padding:4px 12px !important;font-size:.78rem !important;border-radius:8px;
+    border:1.5px solid #c9d4fb;color:var(--accent-dark);background:#fff;font-weight:800;cursor:pointer;
+  }
+  .mini-pull:hover{background:#f2f4ff;border-color:var(--accent-dark);}
   .mini-task.done-row .mt-title{text-decoration:line-through;color:#b6bdd8;}
   .day-note{color:#8a93b5;font-size:.82rem;margin:4px 0 0 4px;}
   .plan-sub b{color:var(--ink);}
@@ -356,16 +361,42 @@
 
   const effMins2_removed = null; /* (scheduling moved above) */
 
-  /* moves: task moved to a later day ("I'll do this next day") */
+  /* moves: task moved to a later day ("I'll do this next day")
+     ya pull kiya gaya ("Aaj karo" — kal ka lec aaj) */
   let moves = {};
   try{ moves = JSON.parse(localStorage.getItem('jee360.moves')||'{}'); }catch(e){}
   const saveMoves = ()=> localStorage.setItem('jee360.moves', JSON.stringify(moves));
-  const dayOf = t => moves[t.id] || baseDayOf[t.id];
 
   /* current day of the plan (from start date) */
   const startDate = new Date((plan.startDate || new Date().toISOString().slice(0,10)) + 'T00:00:00');
   const currentDay = Math.max(1, Math.min(days,
     Math.floor((Date.now() - startDate.getTime()) / 86400000) + 1));
+
+  /* -------- AUTO-REBALANCE --------
+     Aage ke din har baar re-pack hote hain: jo ho chuka / aaj khich
+     liya, uske hisaab se baaki lectures EK-EK UPAR shift ho jaate
+     hain — planner khud adjust hota rehta hai. */
+  let packedDay = {};
+  function repack(){
+    packedDay = {};
+    const futureDaysCnt = days - currentDay;
+    if(futureDaysCnt <= 0) return;
+    const packable = allTasks.filter(t =>
+      !done.has(t.id) && !(t.id in moves) && baseDayOf[t.id] > currentDay);
+    let rem = packable.reduce((s,t)=>s+effMins(t),0);
+    let d = currentDay+1, remD = futureDaysCnt, acc = 0, target = rem/Math.max(1,remD);
+    for(const t of packable){
+      packedDay[t.id] = Math.min(d, days);
+      acc += effMins(t); rem -= effMins(t);
+      if(acc >= target && d < days){ d++; remD--; acc = 0; target = rem/Math.max(1,remD); }
+    }
+  }
+
+  const dayOf = t => {
+    if(moves[t.id]) return moves[t.id];                       // user ka explicit move/pull
+    if(!done.has(t.id) && packedDay[t.id]) return packedDay[t.id];  // auto-shifted
+    return baseDayOf[t.id];
+  };
 
   const taskById = {}; allTasks.forEach(t=>taskById[t.id]=t);
 
@@ -410,17 +441,20 @@
   function miniRow(t){
     const isDone = done.has(t.id);
     const wasMoved = moves[t.id] && !isDone;
+    const canPull = !isDone && !wasMoved && dayOf(t) > currentDay;
     return `<div class="mini-task${isDone?' done-row':''}">
       <span>${isDone?'✅':(wasMoved?'⏭':'⬜')}</span>
       <span class="mt-type">${t.type}</span>
       <span class="mt-title">${t.title}${wasMoved?' <span style="color:#e05b8a;font-size:.72rem;font-weight:800">(MOVED)</span>':''}</span>
       <span class="mt-time">${fmt(effMins(t))}</span>
       ${wasMoved?'<button class="btn mini-undo" data-undo="'+t.id+'">↩ Wapas</button>':''}
+      ${canPull?'<button class="btn mini-pull" data-pull="'+t.id+'">⏫ Aaj karo</button>':''}
       ${isDone?'<button class="btn mini-undo" data-undone="'+t.id+'">↩ Un-done</button>':''}
     </div>`;
   }
 
   function render(){
+    repack();   // har render pe future auto-shift
     /* today = tasks scheduled up to current day (incl. backlog) */
     const todayPending = allTasks.filter(t=>dayOf(t) <= currentDay && !done.has(t.id));
     const todayAll = allTasks.filter(t=>dayOf(t) <= currentDay);
@@ -565,6 +599,13 @@
       b.addEventListener('click', ()=>{
         done.delete(b.dataset.undone);
         saveDone(); render();
+      });
+    });
+    /* pull: kal ka lecture AAJ karo */
+    list.querySelectorAll('[data-pull]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        moves[b.dataset.pull] = currentDay;
+        saveMoves(); render();
       });
     });
     const ua = document.getElementById('undoAll');
