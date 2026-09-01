@@ -134,7 +134,8 @@
     font-size:.72rem;padding:4px 10px;border:1.5px solid #e8a03c;
     color:#b57816;background:#fff;border-radius:8px;font-weight:700;
   }
-  .dpp-btn:hover{background:#fdf0d8;}
+  .dpp-btn:hover:not(:disabled){background:#fdf0d8;}
+  .dpp-btn:disabled{opacity:.5;cursor:not-allowed;border-style:dashed;}
   .chart-card{background:#fff;border:1px solid #e8ebf4;border-radius:16px;
     padding:16px 14px 8px;margin-top:18px;box-shadow:0 2px 10px rgba(20,30,80,.05);}
   .ch-nav{width:34px;height:34px;border-radius:50%;border:1.5px solid #d5daea;background:#fff;
@@ -560,13 +561,16 @@
   function dppRow(t){
     if(!t.dpp) return '';
     const d = done.has(t.dpp.id);
+    const lecDone = done.has(t.id);   // DPP tabhi khulta hai jab uska lecture ho chuka ho
     return `<div class="dpp-row${d?' dpp-done':''}">
-      <span>${d?'✅':'📝'}</span>
+      <span>${d?'✅':(lecDone?'📝':'🔒')}</span>
       <span class="dpp-tag">DPP</span>
       <span class="dpp-name">${t.dpp.title}</span>
       ${d
         ? '<button class="btn mini-undo" data-undone="'+t.dpp.id+'">↩ Un-done</button>'
-        : '<button class="btn dpp-btn" data-done="'+t.dpp.id+'">✓ Done</button>'}
+        : (lecDone
+          ? '<button class="btn dpp-btn" data-done="'+t.dpp.id+'">✓ Done</button>'
+          : '<button class="btn dpp-btn" disabled title="Pehle lecture complete karo">🔒 Lec baaki</button>')}
     </div>`;
   }
 
@@ -805,6 +809,8 @@
     /* events */
     list.querySelectorAll('[data-done]').forEach(b=>{
       b.addEventListener('click', ()=>{
+        const _id = b.dataset.done;
+        if(/-D\d+$/.test(_id) && !done.has(_id.replace(/-D(\d+)$/,'-L$1'))) return;  // DPP locked: lec pehle
         done.add(b.dataset.done);
         if(taskById[b.dataset.done]){ doneLog[b.dataset.done] = currentDay; saveDoneLog(); }
         saveDone(); render();
