@@ -4,7 +4,7 @@
    (pehle cache se turant serve → background mein fresh version
     update → agli baar naya mile. Offline pe bhi sab chalta hai.)
    ============================================================ */
-const CACHE = 'jee360-v17';
+const CACHE = 'jee360-v18';
 
 const PRECACHE = [
   './',
