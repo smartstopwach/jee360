@@ -43,6 +43,10 @@
 
   .wrap{max-width:760px;margin:0 auto;padding:36px 20px 80px;}
 
+  .steps{display:flex;gap:12px;margin-bottom:30px;}
+  .steps span{flex:1;height:4px;border-radius:999px;background:#dfe3f2;}
+  .steps span.done{background:var(--accent-dark);}
+
   .back{
     display:inline-flex;align-items:center;gap:6px;
     color:var(--muted);text-decoration:none;font-weight:600;font-size:.95rem;
@@ -139,6 +143,9 @@
 </div>
 
 <div class="wrap">
+  <div class="steps">
+    <span class="done"></span><span class="done"></span><span></span><span></span>
+  </div>
   <a class="back" href="index.html">‹ Back</a>
   <h1>How fast do you want to prepare?</h1>
   <p class="subtitle">Choose a timeline based on how much time you can study every day.</p>
@@ -164,8 +171,8 @@
   </div>
 
   <div class="cta-row">
-    <button class="cta-btn" id="createPlan">Create My Study Plan ✓</button>
-    <p class="note" id="planNote"></p>
+    <button class="cta-btn" id="createPlan">Continue →</button>
+    <p class="note">Next: choose how you want to study.</p>
   </div>
 </div>
 
@@ -253,10 +260,7 @@
 
   document.getElementById('createPlan').addEventListener('click', ()=>{
     localStorage.setItem('jee360.plan', JSON.stringify({subjects:keys, days:chosenDays, speed:speed}));
-    const end = new Date(Date.now() + chosenDays*86400000);
-    document.getElementById('planNote').textContent =
-      '✅ Plan saved! ' + chosenDays + ' days · ' + speed + 'x · finish by ' +
-      end.toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}) + '.';
+    window.location.href = 'study-mode.html';
   });
 
   renderPaces();

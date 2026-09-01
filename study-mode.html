@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JEE360 Study Planner — How do you want to study?</title>
+<style>
+  :root{
+    --bg:#f7f8fc;
+    --card:#ffffff;
+    --ink:#1c2340;
+    --muted:#8a93b5;
+    --accent:#7b8cf5;
+    --accent-dark:#5b6ee8;
+    --border:#e6e9f4;
+    --mint-bg:#d8f7ee;
+    --mint-ink:#0f9d77;
+    --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;
+  }
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 5%;
+    background:#fff;border-bottom:1px solid var(--border);
+    position:sticky;top:0;z-index:20;
+  }
+  .brand{font-size:1.05rem;color:var(--ink);text-decoration:none;}
+  .brand b{font-weight:800;}
+  .brand span{color:var(--accent-dark);font-weight:600;margin-left:6px;}
+  .avatar{
+    width:36px;height:36px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),#22d3ee);
+    color:#fff;font-weight:800;font-size:.9rem;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .wrap{max-width:760px;margin:0 auto;padding:30px 20px 120px;}
+
+  /* ---------- PROGRESS STEPS ---------- */
+  .steps{display:flex;gap:12px;margin-bottom:30px;}
+  .steps span{
+    flex:1;height:4px;border-radius:999px;background:#dfe3f2;
+  }
+  .steps span.done{background:var(--accent-dark);}
+
+  .back{
+    display:inline-flex;align-items:center;gap:6px;
+    color:var(--muted);text-decoration:none;font-weight:600;font-size:.95rem;
+    margin-bottom:18px;
+  }
+  .back:hover{color:var(--accent-dark);}
+
+  h1{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:800;margin-bottom:8px;}
+  .subtitle{color:var(--muted);margin-bottom:34px;font-size:1.02rem;}
+
+  /* ---------- MODE CARDS ---------- */
+  .mode{
+    background:var(--card);
+    border:2px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px 26px;
+    margin-bottom:18px;
+    cursor:pointer;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .mode:hover{border-color:#c9d2f7;}
+  .mode.active{
+    border-color:var(--accent);
+    box-shadow:0 6px 24px rgba(123,140,245,.16);
+  }
+  .mode .m-title{
+    display:flex;align-items:center;gap:12px;
+    font-size:1.12rem;font-weight:800;
+  }
+  .badge{
+    font-size:.68rem;font-weight:800;letter-spacing:1px;
+    padding:4px 10px;border-radius:6px;
+    background:var(--mint-bg);color:var(--mint-ink);text-transform:uppercase;
+  }
+  .mode .m-desc{color:var(--muted);font-size:.95rem;margin-top:6px;}
+
+  /* ---------- PREVIEW ---------- */
+  .day-preview{
+    background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px 24px;margin-top:26px;
+  }
+  .day-preview h4{font-size:.95rem;color:var(--muted);font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;}
+  .day-preview .drow{
+    display:flex;justify-content:space-between;padding:8px 0;
+    border-top:1px dashed var(--border);font-size:.94rem;color:#4a536e;
+  }
+  .day-preview .drow b{color:var(--ink);}
+
+  /* ---------- FOOTER BAR ---------- */
+  .footbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 6%;
+    background:rgba(255,255,255,.95);backdrop-filter:blur(10px);
+    border-top:1px solid var(--border);
+  }
+  .footbar .meta{color:var(--muted);font-size:.95rem;font-weight:600;}
+  .start-btn{
+    padding:13px 34px;border-radius:999px;border:none;
+    background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+    color:#fff;font-weight:800;font-size:1rem;cursor:pointer;
+    box-shadow:0 10px 26px rgba(91,110,232,.3);
+    transition:transform .15s;
+  }
+  .start-btn:hover{transform:translateY(-2px);}
+  .note{color:var(--mint-ink);font-size:.9rem;font-weight:700;margin-top:16px;text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="index.html"><b>JEE360</b><span>Study Planner</span></a>
+  <div class="avatar">J</div>
+</div>
+
+<div class="wrap">
+  <div class="steps">
+    <span class="done"></span><span class="done"></span><span class="done"></span><span></span>
+  </div>
+
+  <a class="back" href="planner.html">‹ Back</a>
+  <h1>How do you want to study?</h1>
+  <p class="subtitle">Same work, same finish date – this only changes what a day looks like.</p>
+
+  <div class="mode active" data-mode="weekly">
+    <div class="m-title">Weekly Timetable <span class="badge">Recommended</span></div>
+    <p class="m-desc">Study up to 2 subjects each day and stay consistent across the week.</p>
+  </div>
+
+  <div class="mode" data-mode="single">
+    <div class="m-title">One Subject at a Time</div>
+    <p class="m-desc">Finish one subject before moving to the next.</p>
+  </div>
+
+  <div class="day-preview">
+    <h4>What a typical day looks like</h4>
+    <div id="previewRows"></div>
+  </div>
+
+  <p class="note" id="doneNote"></p>
+</div>
+
+<div class="footbar">
+  <span class="meta" id="planMeta">— subjects · — days</span>
+  <button class="start-btn" id="startBtn">Start my planner</button>
+</div>
+
+<script>
+(function(){
+  const SUBJECTS = {
+    phy:'Physics', oc:'Organic Chemistry', pc:'Physical Chemistry',
+    ioc:'Inorganic Chemistry', math:'Mathematics'
+  };
+
+  // read saved plan (subjects + days + speed)
+  let plan = {};
+  try{ plan = JSON.parse(localStorage.getItem('jee360.plan')||'{}'); }catch(e){}
+  let subjects = plan.subjects || [];
+  if(!subjects.length){
+    try{ subjects = JSON.parse(localStorage.getItem('jee360.subjects')||'[]'); }catch(e){}
+  }
+  if(!subjects.length) subjects = Object.keys(SUBJECTS);
+  subjects = subjects.filter(k=>SUBJECTS[k]);
+  const days  = plan.days  || 90;
+  const speed = plan.speed || 1.25;
+
+  document.getElementById('planMeta').textContent =
+    subjects.length + ' subject' + (subjects.length>1?'s':'') + ' · ' + days + ' days';
+
+  let mode = 'weekly';
+  const modes = document.querySelectorAll('.mode');
+  modes.forEach(m=>{
+    m.addEventListener('click', ()=>{
+      modes.forEach(x=>x.classList.remove('active'));
+      m.classList.add('active');
+      mode = m.dataset.mode;
+      renderPreview();
+    });
+  });
+
+  function renderPreview(){
+    const rows = document.getElementById('previewRows');
+    if(mode === 'weekly'){
+      const a = SUBJECTS[subjects[0]] || 'Subject 1';
+      const b = SUBJECTS[subjects[1] ] || a;
+      rows.innerHTML =
+        '<div class="drow"><span>Morning session</span><b>'+a+' — lectures + notes</b></div>' +
+        '<div class="drow"><span>Evening session</span><b>'+(subjects.length>1?b:a)+' — DPP / practice</b></div>' +
+        '<div class="drow"><span>Across the week</span><b>All ' + subjects.length + ' subjects rotate</b></div>';
+    }else{
+      const first = SUBJECTS[subjects[0]] || 'First subject';
+      rows.innerHTML =
+        '<div class="drow"><span>Full day focus</span><b>'+first+' — lectures + DPP</b></div>' +
+        '<div class="drow"><span>Until finished</span><b>Then move to the next subject</b></div>' +
+        '<div class="drow"><span>Order</span><b>' + subjects.map(k=>SUBJECTS[k].split(' ')[0]).join(' → ') + '</b></div>';
+    }
+  }
+
+  document.getElementById('startBtn').addEventListener('click', ()=>{
+    plan = { subjects, days, speed, mode };
+    localStorage.setItem('jee360.plan', JSON.stringify(plan));
+    const end = new Date(Date.now() + days*86400000);
+    document.getElementById('doneNote').textContent =
+      '✅ Planner ready! ' + (mode==='weekly'?'Weekly Timetable':'One Subject at a Time') +
+      ' · ' + days + ' days · finish by ' +
+      end.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) +
+      '. (Day-by-day schedule page coming next!)';
+  });
+
+  renderPreview();
+})();
+</script>
+
+</body>
+</html>
