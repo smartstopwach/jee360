@@ -4,7 +4,7 @@
    (pehle cache se turant serve → background mein fresh version
     update → agli baar naya mile. Offline pe bhi sab chalta hai.)
    ============================================================ */
-const CACHE = 'jee360-v4';
+const CACHE = 'jee360-v5';
 
 const PRECACHE = [
   './',
@@ -18,6 +18,9 @@ const PRECACHE = [
   './firebase-config.js',
   './pwa.js',
   './manifest.webmanifest',
+  './favicon-32.png',
+  './favicon-48.png',
+  './favicon.ico',
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png'
