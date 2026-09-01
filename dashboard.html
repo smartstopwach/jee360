@@ -401,10 +401,13 @@
   try{ replaced = new Set(JSON.parse(localStorage.getItem('jee360.replaced')||'[]')); }catch(e){}
   const saveReplaced = ()=> localStorage.setItem('jee360.replaced', JSON.stringify([...replaced]));
 
-  /* current day of the plan (from start date) */
+  /* current day of the plan (from start date)
+     DIN SUBAH 3 BAJE FLIP HOTA HAI — raat 12 se 3 tak jo padhoge,
+     wo usi din (pichle wale) mein count hota hai. Late-night grace. */
+  const ROLLOVER_MS = 3 * 3600000;   // 3 AM
   const startDate = new Date((plan.startDate || new Date().toISOString().slice(0,10)) + 'T00:00:00');
   const currentDay = Math.max(1, Math.min(days,
-    Math.floor((Date.now() - startDate.getTime()) / 86400000) + 1));
+    Math.floor((Date.now() - ROLLOVER_MS - startDate.getTime()) / 86400000) + 1));
 
   /* -------- REPLAN (chapters badle gaye) --------
      Plan chalu hone ke baad user ne chapters add/remove kiye →
