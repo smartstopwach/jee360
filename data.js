@@ -35,7 +35,7 @@ window.JEE360_DATA = {
       teacher: "Saleem Ahmad Sir",
       estimated: false,
       durationsPending: true,
-      lec: 288,   // ~230 lectures × ~75 min avg (until real durations arrive)
+      lec: 460,  // 230 lectures × 2h default (until real durations arrive)
       prac: 94,   // ~141 DPPs × ~40 min avg
       chapters: [
         { no:1,  name:"Mathematical Tools",                  v:7,  e:6,  n:13,
@@ -121,7 +121,7 @@ window.JEE360_DATA = {
       teacher: "Faisal Razaq Sir",
       estimated: false,
       durationsPending: true,
-      lec: 120,  // ~96 lectures × ~75 min avg (until real durations arrive)
+      lec: 192,  // 96 lectures × 2h default (until real durations arrive)
       prac: 41,  // ~61 DPPs × ~40 min avg
       chapters: [
         { no:1,  name:"Some Basic Concepts of Chemistry", v:16, e:10, n:26 },
@@ -149,7 +149,7 @@ window.JEE360_DATA = {
       teacher: "Pankaj Sijariya Sir",
       estimated: false,
       durationsPending: true,
-      lec: 91,   // ~73 lectures × ~75 min avg (until real durations arrive)
+      lec: 146,  // 73 lectures × 2h default (until real durations arrive)
       prac: 41,  // ~62 DPPs × ~40 min avg
       chapters: [
         { no:1,  name:"Some Basic Principles and Techniques: IUPAC Nomenclature", v:5,  e:5,  n:10 },
@@ -175,7 +175,7 @@ window.JEE360_DATA = {
       teacher: "Kunwar Om Pandey Sir",
       estimated: false,
       durationsPending: true,
-      lec: 85,   // ~68 lectures × ~75 min avg (until real durations arrive)
+      lec: 136,  // 68 lectures × 2h default (until real durations arrive)
       prac: 27,  // ~41 DPPs × ~40 min avg
       chapters: [
         { no:1, name:"Periodic Table",                              v:10, e:9,  n:19 },
@@ -200,7 +200,7 @@ window.JEE360_DATA = {
       teacher: "Sachin Jakhar Sir",
       estimated: false,
       durationsPending: true,
-      lec: 216,  // ~173 lectures × ~75 min avg (until real durations arrive)
+      lec: 346,  // 173 lectures × 2h default (until real durations arrive)
       prac: 109, // ~164 DPPs × ~40 min avg
       chapters: [
         { no:1,  name:"Basic Maths",                            v:12, e:11, n:23 },
