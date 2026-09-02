@@ -55,23 +55,53 @@
     });
   }
 
-  /* ---------- "Notifications on karo" banner ---------- */
+  /* ---------- "Notifications on karo" banner (styled) ---------- */
   function showBanner(user){
     if(document.getElementById('jeePushBanner')) return;
+
+    var css = document.createElement('style');
+    css.textContent =
+      '@keyframes jeePushUp{from{opacity:0;transform:translate(-50%,24px)}' +
+      'to{opacity:1;transform:translate(-50%,0)}}' +
+      '#jeePushBanner{position:fixed;left:50%;bottom:150px;z-index:9998;' +
+      'transform:translateX(-50%);width:min(400px,92vw);background:#fff;' +
+      'border:1px solid #e4e9f4;border-radius:20px;padding:16px;' +
+      'box-shadow:0 18px 50px rgba(28,35,64,.22);font-family:inherit;' +
+      'animation:jeePushUp .35s cubic-bezier(.2,.9,.3,1.2)}' +
+      '#jeePushBanner .jp-row{display:flex;gap:13px;align-items:flex-start}' +
+      '#jeePushBanner .jp-bell{flex:none;width:44px;height:44px;border-radius:14px;' +
+      'background:linear-gradient(135deg,#22d3ee,#3b82f6);display:flex;align-items:center;' +
+      'justify-content:center;font-size:1.35rem;box-shadow:0 6px 16px rgba(59,130,246,.35)}' +
+      '#jeePushBanner .jp-t{font-weight:800;color:#1c2340;font-size:.95rem;margin-bottom:3px}' +
+      '#jeePushBanner .jp-s{color:#8a93b5;font-size:.8rem;line-height:1.45}' +
+      '#jeePushBanner .jp-btns{display:flex;gap:10px;margin-top:13px}' +
+      '#jeePushBanner .jp-on{flex:1;background:linear-gradient(135deg,#22d3ee,#3b82f6);' +
+      'color:#fff;border:none;border-radius:12px;padding:11px 0;font-weight:800;' +
+      'font-size:.88rem;cursor:pointer;font-family:inherit;' +
+      'box-shadow:0 6px 16px rgba(59,130,246,.3)}' +
+      '#jeePushBanner .jp-on:active{transform:scale(.97)}' +
+      '#jeePushBanner .jp-off{background:#f3f5fb;color:#8a93b5;border:none;' +
+      'border-radius:12px;padding:11px 18px;font-weight:700;font-size:.88rem;' +
+      'cursor:pointer;font-family:inherit}' +
+      '#jeePushBanner .jp-done{display:flex;align-items:center;gap:10px;' +
+      'font-weight:700;color:#1c2340;font-size:.9rem;padding:6px 2px}';
+    document.head.appendChild(css);
+
     var b = document.createElement('div');
     b.id = 'jeePushBanner';
-    b.style.cssText =
-      'position:fixed;left:50%;transform:translateX(-50%);bottom:150px;z-index:9998;' +
-      'background:#1c2340;color:#fff;border-radius:16px;padding:14px 18px;' +
-      'box-shadow:0 8px 30px rgba(28,35,64,.35);display:flex;align-items:center;' +
-      'gap:12px;font-size:.88rem;max-width:92vw;font-family:inherit;';
     b.innerHTML =
-      '<span>🔔 Daily reminders chahiye?</span>' +
-      '<button id="jeePushYes" style="background:#5b6cff;color:#fff;border:none;' +
-      'border-radius:99px;padding:9px 16px;font-weight:700;font-size:.85rem;' +
-      'cursor:pointer;font-family:inherit;white-space:nowrap;">On karo</button>' +
-      '<button id="jeePushNo" style="background:none;border:none;color:#8a93b5;' +
-      'font-size:1.1rem;cursor:pointer;padding:4px;">✕</button>';
+      '<div class="jp-row">' +
+        '<div class="jp-bell">🔔</div>' +
+        '<div>' +
+          '<div class="jp-t">Daily reminders on karo</div>' +
+          '<div class="jp-s">Subah aaj ka plan, peeche ho toh nudge,' +
+          ' raat ko last call — sab automatic 📲</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="jp-btns">' +
+        '<button class="jp-on" id="jeePushYes">🔔 On karo</button>' +
+        '<button class="jp-off" id="jeePushNo">Baad me</button>' +
+      '</div>';
     document.body.appendChild(b);
 
     document.getElementById('jeePushNo').onclick = function(){ b.remove(); };
@@ -79,11 +109,11 @@
       /* user-click = pakka popup (quiet prompt nahi) */
       Notification.requestPermission().then(function(perm){
         if(perm !== 'granted'){ b.remove(); return; }
-        b.innerHTML = '<span>⏳ Set ho raha hai…</span>';
+        b.innerHTML = '<div class="jp-done">⏳ Set ho raha hai…</div>';
         saveToken(user, function(ok){
           b.innerHTML = ok
-            ? '<span>✅ Ho gaya! Roz 7:37 pe plan aayega 📲</span>'
-            : '<span>❌ Kuch gadbad — baad me try karna</span>';
+            ? '<div class="jp-done">✅ Ho gaya! Roz 7:37 pe aaj ka plan aayega 📲</div>'
+            : '<div class="jp-done">❌ Kuch gadbad — baad me try karna</div>';
           setTimeout(function(){ b.remove(); }, 4000);
         });
       });
