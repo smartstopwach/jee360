@@ -205,6 +205,16 @@ async function sendFCM(tok, token, msg){
   const sa = JSON.parse(process.env.FCM_SA);
   const tok = await accessToken(sa);
 
+  /* dedupe: ek slot din me sirf EK baar jaaye (backup cron ke liye) */
+  const todayStr = new Date().toLocaleDateString('en-CA');   // YYYY-MM-DD IST
+  const state = await fsGet(tok, '/system/notify');
+  const lastSent = state && state.fields && state.fields[slot]
+    && state.fields[slot].stringValue;
+  if(lastSent === todayStr){
+    console.log('aaj ka', slot, 'pehle hi ja chuka (' + todayStr + ') — skip');
+    return;
+  }
+
   const list = await fsGet(tok, '/users?pageSize=300');
   const docs = (list && list.documents) || [];
   console.log('users:', docs.length);
@@ -243,5 +253,11 @@ async function sendFCM(tok, token, msg){
       });
     }
   }
+  /* is slot ko aaj ke liye "sent" mark karo */
+  await fetch(FS_BASE + '/system/notify?updateMask.fieldPaths=' + slot, {
+    method: 'PATCH',
+    headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: { [slot]: { stringValue: todayStr } } })
+  });
   console.log('done ✓');
 })().catch(e => { console.error(e); process.exit(1); });
