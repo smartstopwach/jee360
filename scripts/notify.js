@@ -19,9 +19,12 @@ const PROJECT = 'jee360-0';
 function currentSlot(){
   if(process.env.SLOT) return process.env.SLOT;
   const h = new Date().getHours();          // IST
-  if(h < 12) return 'morning';
-  if(h < 18) return 'afternoon';
-  return 'night';
+  if(h < 10) return 'morning';   // 7:37
+  if(h < 13) return 'mid1';      // 10:37
+  if(h < 16) return 'mid2';      // 13:37
+  if(h < 19) return 'mid3';      // 16:37
+  if(h < 21) return 'mid4';      // 19:37
+  return 'night';                // 21:37
 }
 
 /* ---------------- Google OAuth (service account JWT) ---------------- */
@@ -146,12 +149,17 @@ function compose(t, slot){
     return { title: '🎯 Day ' + t.day + '/' + t.days + ' — aaj ka plan taiyar',
              body, tag: 'jee360-morning' };
   }
-  if(slot === 'afternoon'){
-    if(t.pctAll >= 40 || !tasks) return null;         // aage chal rahe ho = silence
-    return { title: '😴 Abhi tak sirf ' + t.pctAll + '% hua',
-             body: 'Half din nikal gaya! ' + lecStr + ' · ' + hm(t.leftMins) +
-                   ' baaki — ab shuru karo warna raat bhaari',
-             tag: 'jee360-noon' };
+  if(slot.indexOf('mid') === 0){
+    if(!tasks) return null;                           // sab done = silence (shabashi raat ko)
+    const p = t.pctAll;
+    let title;
+    if(p === 0)      title = '😴 Abhi tak kuch nahi hua';
+    else if(p < 40)  title = '⏳ Sirf ' + p + '% hua — thoda tez chalo';
+    else if(p < 80)  title = '💪 ' + p + '% ho gaya — lage raho';
+    else             title = '🔥 ' + p + '% done — bas thoda sa bacha!';
+    return { title,
+             body: lecStr + ' · ' + hm(t.leftMins) + ' baaki',
+             tag: 'jee360-' + slot };
   }
   /* night */
   if(!tasks)
@@ -193,7 +201,7 @@ async function sendFCM(tok, token, msg){
     const data = JSON.parse(fs.readFileSync(process.env.TEST_DATA, 'utf8'));
     const t = computeToday(data);
     console.log('__today =', JSON.stringify(t, null, 2));
-    for(const s of ['morning','afternoon','night'])
+    for(const s of ['morning','mid1','mid2','mid3','mid4','night'])
       console.log(s, '→', JSON.stringify(compose(t, s)));
     return;
   }

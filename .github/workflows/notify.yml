@@ -2,15 +2,20 @@ name: Daily notifications
 
 on:
   schedule:
-    # har slot ke 2 attempts (45 min gap) — GitHub cron kabhi kabhi
-    # skip/late hota hai; dedupe hai isliye double kabhi nahi jayega.
-    # Odd minutes rakhe hain — round time pe GitHub pe bheed hoti hai.
+    # har 3 ghante (7:37 se 21:37 IST) — har slot ka 45 min baad
+    # backup attempt bhi hai; dedupe hai isliye double kabhi nahi jayega.
     - cron: '7 2 * * *'     # 07:37 IST — aaj ka plan
-    - cron: '52 2 * * *'    # 08:22 IST — (backup)
-    - cron: '37 8 * * *'    # 14:07 IST — half-time check (smart)
-    - cron: '22 9 * * *'    # 14:52 IST — (backup)
-    - cron: '37 15 * * *'   # 21:07 IST — last call / shabashi
-    - cron: '22 16 * * *'   # 21:52 IST — (backup)
+    - cron: '52 2 * * *'    #   backup
+    - cron: '7 5 * * *'     # 10:37 IST — nudge
+    - cron: '52 5 * * *'    #   backup
+    - cron: '7 8 * * *'     # 13:37 IST — nudge
+    - cron: '52 8 * * *'    #   backup
+    - cron: '7 11 * * *'    # 16:37 IST — nudge
+    - cron: '52 11 * * *'   #   backup
+    - cron: '7 14 * * *'    # 19:37 IST — nudge
+    - cron: '52 14 * * *'   #   backup
+    - cron: '7 16 * * *'    # 21:37 IST — last call / shabashi
+    - cron: '22 16 * * *'   #   backup (21:52 — 10 baje ke baad silence)
   workflow_dispatch:
     inputs:
       slot:
