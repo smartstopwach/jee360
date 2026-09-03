@@ -4,7 +4,7 @@
    (pehle cache se turant serve → background mein fresh version
     update → agli baar naya mile. Offline pe bhi sab chalta hai.)
    ============================================================ */
-const CACHE = 'jee360-v24';
+const CACHE = 'jee360-v25';
 
 const PRECACHE = [
   './',
@@ -23,7 +23,9 @@ const PRECACHE = [
   './favicon.ico',
   './icon-192.png',
   './icon-512.png',
-  './icon-maskable-512.png'
+  './icon-maskable-512.png',
+  './notif-icon-96.png',
+  './notif-badge-36.png'
 ];
 
 /* Firebase/Google API calls — kabhi cache nahi (live data) */
@@ -102,8 +104,11 @@ self.addEventListener('push', e => {
   if(!d || !d.title) return;
   e.waitUntil(self.registration.showNotification(d.title, {
     body: d.body || '',
-    icon: 'icon-192.png',
-    badge: 'icon-192.png',
+    icon: 'notif-icon-96.png',
+    /* badge = Android status-bar icon. Ye sirf ALPHA channel padhta hai,
+       isliye notif-badge-36.png me letters opaque + background transparent
+       hai (warna solid white blob ban jaata). */
+    badge: 'notif-badge-36.png',
     tag: d.tag || 'jee360',
     renotify: true,
     data: { url: d.url || './dashboard.html' },
