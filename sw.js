@@ -4,7 +4,7 @@
    (pehle cache se turant serve → background mein fresh version
     update → agli baar naya mile. Offline pe bhi sab chalta hai.)
    ============================================================ */
-const CACHE = 'jee360-v25';
+const CACHE = 'jee360-v26';
 
 const PRECACHE = [
   './',
@@ -24,6 +24,7 @@ const PRECACHE = [
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png',
+  './icon-maskable-192.png',
   './notif-icon-96.png',
   './notif-badge-36.png'
 ];
