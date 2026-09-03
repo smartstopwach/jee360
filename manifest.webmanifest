@@ -1,5 +1,6 @@
 {
   "name": "JEE360 — JEE Prep Planner",
+  "id": "jee360-v2",
   "short_name": "JEE360",
   "description": "JEE Main & Advanced ka 360° study planner — day-wise lecture path, DPPs, progress tracking aur Google cloud sync.",
   "start_url": "./index.html",
