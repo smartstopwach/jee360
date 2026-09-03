@@ -15,16 +15,31 @@ const crypto = require('crypto');
 const ROOT = path.join(__dirname, '..');
 const PROJECT = 'jee360-0';
 
-/* ---------------- slot decide ---------------- */
+/* ---------------- slot decide ----------------
+   Purana logic galat tha: ghante ke BAND se slot decide hota tha
+   (h<10 → morning). Backup crons 45-90 min baad chalte hain, isliye
+   woh agli ghante me ghus jaate aur GALAT slot bhej dete — jaise
+   21:37 wala backup 21:52 ko chal ke 'night' ka dobara bhej sakta tha
+   (raat 10 ke baad silence wala waada toot raha tha).
+   Ab: har slot ki apni scheduled IST time + tolerance window.
+   Koi window match na kare → null → ek bhi notification nahi jayegi. */
+const SLOTS = [                                  // [name, hh, mm, minutes-tolerance]
+  ['morning',  7, 37, 90],
+  ['mid1',    10, 37, 90],
+  ['mid2',    13, 37, 90],
+  ['mid3',    16, 37, 90],
+  ['mid4',    19, 37, 90],
+  ['night',   21, 37, 45]                        // last call — raat 10 ke baad chup
+];
 function currentSlot(){
-  if(process.env.SLOT) return process.env.SLOT;
-  const h = new Date().getHours();          // IST
-  if(h < 10) return 'morning';   // 7:37
-  if(h < 13) return 'mid1';      // 10:37
-  if(h < 16) return 'mid2';      // 13:37
-  if(h < 19) return 'mid3';      // 16:37
-  if(h < 21) return 'mid4';      // 19:37
-  return 'night';                // 21:37
+  if(process.env.SLOT) return process.env.SLOT;   // manual dispatch = jo bola wahi
+  const n = new Date();
+  const mins = n.getHours()*60 + n.getMinutes();
+  for(const [name,h,m,tol] of SLOTS){
+    const at = h*60 + m;
+    if(mins >= at && mins <= at + tol) return name;
+  }
+  return null;                                    // koi slot nahi — send mat karo
 }
 
 /* ---------------- Google OAuth (service account JWT) ---------------- */
@@ -196,7 +211,8 @@ async function sendFCM(tok, token, msg){
   const slot = currentSlot();
   console.log('slot =', slot, '| IST =', new Date().toString());
 
-  /* local test mode: TEST_DATA=path to JSON of localStorage map */
+  /* local test mode: TEST_DATA=path to JSON of localStorage map
+     (silence-check se PEHLE — bina network ke slot/summary test karne ke liye) */
   if(process.env.TEST_DATA){
     const data = JSON.parse(fs.readFileSync(process.env.TEST_DATA, 'utf8'));
     const t = computeToday(data);
@@ -205,6 +221,8 @@ async function sendFCM(tok, token, msg){
       console.log(s, '→', JSON.stringify(compose(t, s)));
     return;
   }
+
+  if(!slot){ console.log('koi slot window me nahi — silence ✓'); return; }
 
   if(!process.env.FCM_SA){
     console.log('FCM_SA secret abhi set nahi hai — kuch nahi bheja. (Setup pending)');

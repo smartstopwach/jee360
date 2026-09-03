@@ -19,8 +19,10 @@ on:
   workflow_dispatch:
     inputs:
       slot:
-        description: 'morning / afternoon / night'
+        description: 'morning / mid1 / mid2 / mid3 / mid4 / night (khaali = current slot, window ke andar)'
         required: false
+        type: choice
+        options: ['morning','mid1','mid2','mid3','mid4','night','']
 
 permissions:
   contents: read

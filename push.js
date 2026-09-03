@@ -112,7 +112,7 @@
         b.innerHTML = '<div class="jp-done">⏳ Set ho raha hai…</div>';
         saveToken(user, function(ok){
           b.innerHTML = ok
-            ? '<div class="jp-done">✅ Ho gaya! Roz 7:37 pe aaj ka plan aayega 📲</div>'
+            ? '<div class="jp-done">✅ Ho gaya! Subah 7:37 pe plan, phir har 3 ghante nudge — raat 10 ke baad shant 📲</div>'
             : '<div class="jp-done">❌ Kuch gadbad — baad me try karna</div>';
           setTimeout(function(){ b.remove(); }, 4000);
         });
